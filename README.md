@@ -1,5 +1,4 @@
-<font size="32"> jcedit 3 </font>
-<font size = "">
+# jcedit 3 
   _"The working man's command line text editor."_
   
   ---
