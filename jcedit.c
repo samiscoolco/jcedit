@@ -33,17 +33,23 @@ int getch(void) {
 int main(int argc, char *argv[]) {
 	//init variables
 	const char header[50] = "JCEdit Version 3 - Written by sam0s";
-	char full_file[9999][100];
+	
+  char full_file[9999][100];
 	char clinetext[100];
 	char *lineJump = malloc(sizeof(char)*5);
-	int linemax = 0;
+	
+  int linemax = 0;
 	int clinenum = 0;
-	int cmd = 0;
-
+	
+  int cmd = 0;
+  
+  int dispmin = 0;
+  int dispmax = 7;
+  
 	char *filename = NULL;
 
 	//load file if it exists
-	if(file_exist(argv[1]))
+	if(argc>1)
 	{
 		filename = argv[1];
 	}
@@ -81,8 +87,7 @@ int main(int argc, char *argv[]) {
 		printf("%d| ", clinenum);
 		fgets(clinetext,100,stdin);
 		clinetext[strcspn(clinetext, "\n")] = '\0';
-
-		
+    
 		if(strcmp(clinetext, ".qt") == 0){run=0;cmd=1;}
 		if(strcmp(clinetext, ".mv") == 0){
 			cmd=1;
