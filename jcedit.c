@@ -41,7 +41,8 @@ struct editorData{
 
 const char header[50] = "JCEdit Version 3.2 - Written by sam0s";
 struct editorData ED;
-char full_file[9999][100];
+
+char **full_file = NULL;
 char clinetext[100];
 char lineJump[5];
 
@@ -63,28 +64,29 @@ void init(int argc, char **argv){
   //file name prompt
   system("cls||clear");
   printf("%s \nEnter file name: ",header);
-  ED.filename = malloc(sizeof(char)*50);
+  ED.filename = malloc(50);
   fgets(ED.filename,50,stdin);
   ED.filename[strcspn(ED.filename, "\n")] = '\0';
-
   }
-
   //load file if it exists
   if(file_exist(ED.filename))
   {
-    FILE *fp = fopen(ED.filename, "r");
-    while(!feof(fp)){
-    fgets(full_file[ED.linemax], 500, fp);
-    full_file[ED.linemax][strcspn(full_file[ED.linemax], "\n")] = 0;
-    ED.linemax+=1;
-    }
+      size_t cap = 0;
+      ssize_t len;
+      char *line = NULL;
+      FILE *fp = fopen(ED.filename, "r");
+      while ((len = getline(&line, &cap, fp)) != -1) {
+        full_file = realloc(full_file, sizeof(char*)*(ED.linemax+1));
+        full_file[ED.linemax] = malloc(len+1);
+        full_file[ED.linemax] = strndup(line,len-1);
+        ED.linemax+=1;
+      }
     fclose(fp);
-  }
-
+  }else{full_file=malloc(sizeof(char*));}
+  
   system("cls||clear");
   printf("%s \n",header);
   printf("FILENAME: %s | LINEMAX: %d \n\n",ED.filename,ED.linemax);
-  
 }
 
 int main(int argc, char *argv[]) {
@@ -144,7 +146,8 @@ int main(int argc, char *argv[]) {
   
       if(ED.linemax>=1){
       printf("\n");
-      for(int i=ED.disp;i<ED.disp+ED.dispLength;i+=1){
+      int maxShow = (ED.linemax < ED.disp+ED.dispLength) ? ED.linemax:ED.disp+ED.dispLength;
+      for(int i=ED.disp;i<maxShow;i+=1){
         printf("%d| %s\n",i,full_file[i]);
         }
       }
@@ -153,13 +156,20 @@ int main(int argc, char *argv[]) {
   
   
 		if(ED.cmd==0){
-		strcpy(full_file[ED.clinenum], clinetext);
+    
+    full_file[ED.clinenum] = malloc(strlen(clinetext)+1);
+		full_file[ED.clinenum] = strdup(clinetext);
 		ED.clinenum+=1;
-		if (ED.clinenum>ED.linemax){ED.linemax+=1;}
+    //So i don't know why adding two makes this work, but adding 1 does not. Will figure out later.
+    full_file = realloc(full_file, sizeof(char*)*(ED.linemax+2));
+    
+		if (ED.clinenum>ED.linemax){
+      ED.linemax+=1;
+      
+      }
 		}
   
 		ED.cmd = 0;
-		strcpy(clinetext, "");
 		fflush(stdin);
 	}
 
