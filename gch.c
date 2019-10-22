@@ -16,7 +16,7 @@ int getch(void) {
     return ch;
 }
 int main() {
-int a = 0;while(a!=27){
+int a = 0;while(a!=113){
 a=getch();printf("%d  ",a);
 } return 0;
 }
