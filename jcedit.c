@@ -29,8 +29,17 @@ char lineJump[5];
 /*** i/o ***/
 
 void clear(void) {    
-	while (getchar() != '\n')
-		;
+	printf("\x1b[?251\x1b[2J\x1b[H\x1b[?25h");
+}
+
+void print_top(void) {
+	printf("%s \n",header);
+	printf("FILENAME: %s | LINEMAX: %d\n\n",ED.filename,ED.linemax);
+}
+
+void refresh_screen(void) {
+	clear();
+	print_top();
 }
 
 int getch(void) {
@@ -126,35 +135,32 @@ int main(int argc, char *argv[]) {
 		
 		if (strcmp(clinetext, ".mv") == 0) {
 			ED.cmd=1;
-			int a=119;
-  
-			while (a == 119 || a == 115){
-				a=getch();
-        			
-				if (a==113) {
-					continue;
-				}
-        			
-				ED.disp += (a==119) ? -1 : 1;
-        			
-				system("cls||clear");
-				printf("%s \n",header);
-				ED.cmd=1;
-        			printf("FILENAME: %s | LINEMAX: %d \n",ED.filename,ED.linemax);
-  
-				if (ED.linemax>=1){
-        				printf("\n");
-	
-					for(int i=ED.disp;i<ED.disp+ED.dispLength;i+=1){
-						printf("%d| %s\n",i,full_file[i]);
+			int a;
+
+			while ((a = getch()) != 27) {
+				switch (a) {
+				case 119: /* w */
+					if (ED.disp > 0) {
+						ED.disp--;
 					}
-        			}
-        
-				printf("\n");
-  
+					break;
+				case 115: /* s */
+					if (ED.disp+ED.dispLength < ED.linemax) {
+						ED.disp++;						
+					}
+				default:
+					break;
+				}
+
+				refresh_screen();
+				
+				if (ED.linemax > 0) {
+					for (int i = ED.disp; i<ED.disp+ED.dispLength; i++) {
+						printf("%d| %s\n", i, full_file[i]);					
+					}
+				}
 			}
-			
-			clear();
+			refresh_screen();
 		}
 		
 		if (strcmp(clinetext, ".ln") == 0){

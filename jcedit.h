@@ -7,6 +7,8 @@
 
 /* i/o */
 void clear(void);
+void print_top(void);
+void refresh_screen(void);
 int getch(void);
 
 /* utility */
