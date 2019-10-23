@@ -8,7 +8,7 @@
 
 #include "jcedit.h"
 
-#define VERNO "3.2"
+#define VERNO "3.5"
 
 struct editorData{
 	int linemax;
@@ -21,10 +21,18 @@ struct editorData{
 
 char header[50];
 struct editorData ED;
-
 char **full_file = NULL;
 char clinetext[100];
 char lineJump[5];
+
+/*** etc ***/
+void show_help(void){
+	clear();
+	printf("JCEdit Version %s\nWritten by sam0s & jdedmondt\n\n",VERNO);
+	printf("Commands:\n\t..? - Show this screen\n\t.qt - Close JCEdit\n\t.sv - Save currently open file\n\t.ls - List lines into display window\n\t.ln - Set current line number\n\t.mv - Use W and S to scroll around the display window\n\nPress enter to return...");
+	getchar();
+}
+
 
 /*** i/o ***/
 
@@ -40,6 +48,7 @@ void print_top(void) {
 void refresh_screen(void) {
 	clear();
 	print_top();
+	//maybe going to add ls call here once its functionalized.
 }
 
 int getch(void) {
@@ -84,7 +93,7 @@ void init(int argc, char **argv){
 	ED.filename = NULL;
 
 	/* write header */
-	sprintf(header, "JCEdit Version %s - Written by sam0s", VERNO);
+	sprintf(header, "JCEdit Version %s", VERNO);
 
 	//load file if it exists
  	if (argc > 1) {
@@ -116,10 +125,7 @@ void init(int argc, char **argv){
 	} else {
 		full_file=malloc(sizeof(char*));
 	}
-  
-	system("cls||clear");
-	printf("%s \n",header);
-	printf("FILENAME: %s | LINEMAX: %d \n\n",ED.filename,ED.linemax);
+	
 }
 
 /*** main ***/
@@ -127,12 +133,17 @@ void init(int argc, char **argv){
 int main(int argc, char *argv[]) {
 	init(argc,argv);
 	int run = 1;
-  
+	refresh_screen();
 	while (run) {
 		printf("%d| ", ED.clinenum);
 		fgets(clinetext,100,stdin);
 		clinetext[strcspn(clinetext, "\n")] = '\0';
-  
+
+  		if (strcmp(clinetext, "..?") == 0){
+			ED.cmd=1;
+			show_help();
+			strcpy(clinetext,".ls");
+		}
 		if (strcmp(clinetext, ".qt") == 0){
 			run=0;ED.cmd=1;
 		}
@@ -166,6 +177,7 @@ int main(int argc, char *argv[]) {
 				}
 			}
 			refresh_screen();
+			strcpy(clinetext,".ls");
 		}
 		
 		if (strcmp(clinetext, ".ln") == 0){
@@ -208,7 +220,6 @@ int main(int argc, char *argv[]) {
     			full_file[ED.clinenum] = malloc(strlen(clinetext)+1);
 			full_file[ED.clinenum] = strdup(clinetext);
 			ED.clinenum+=1;
-
 			
 			if (ED.clinenum>ED.linemax){
       				ED.linemax+=1;
