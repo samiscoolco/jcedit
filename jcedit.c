@@ -10,6 +10,16 @@
 
 #define VERNO "3.5"
 
+#define DBGS(s) printf("%s\n", s)
+
+enum keys {
+	ARROW_LEFT = 1000,
+	ARROW_RIGHT,
+	ARROW_UP,
+	ARROW_DOWN,
+};
+
+
 struct editorData{
 	int linemax;
 	int clinenum;
@@ -51,6 +61,75 @@ void refresh_screen(void) {
 	//maybe going to add ls call here once its functionalized.
 }
 
+int process_keypress(void) {
+	int nread;
+	char c;
+	while ((nread = read(STDIN_FILENO, &c, 1) != 1)
+		; /* TODO: ADD ERROR CHECKING HERE */
+	
+	if(c = '\x1b') { /* \x1b is 27 in hex */
+		DBGS("we have an escape sequence");
+		char seq[3];
+		if (read(STDIN_FILENO, &seq[0], 1) != 1) {
+			return '\x1b';
+		}
+		if (read(STDIN_FILENO, &seq[1], 1) != 1) {
+			return '\x1b';
+		}
+
+		switch(seq[0]) {
+			case '[':
+				DBGS("next char is the [");
+				if (seq[1] >= 0 && seq[1] <= 9) {
+					if (read(STDIN_FILENO, &seq[2], 1) != 1) {
+						return '\x1b';
+					}
+					
+					switch(seq[2] == '~') {
+						/* TODO: finsish processing for keys with a 4-byte escape sequence */					
+					case '1':
+					case '8':
+					default:
+						break;
+					}	
+									
+				} else {
+					switch (seq[1]) {
+					case 'A':
+						return ARROW_UP;
+						break;
+					case 'B':
+						return ARROW_DOWN;
+						break;
+					case 'C':
+						return ARROW_RIGHT;
+						break;
+					case 'D':
+						return ARROW_LEFT;
+						break;
+					default:
+						break;
+					}
+				}	
+				break;
+						
+			case 0:
+				DBGS("next char is a 0");
+				switch (ch[1]) {
+				case 'H':
+					return HOME_KEY;
+				case 'F':
+					return END_KEY;
+				}
+				break;
+			default:
+				return '\x1b';
+		}
+	} else {
+		return ch;	
+	}
+}
+
 int getch(void) {
 	struct termios oldattr, newattr;
 	int ch;
@@ -60,8 +139,8 @@ int getch(void) {
 	newattr.c_lflag &= ~(ICANON | ECHO);
 	tcsetattr(STDIN_FILENO, TCSANOW, &newattr);
 	
-	ch = getchar();
-	
+	ch = process_keypress();
+
 	tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);
 	
 	return ch;
@@ -155,6 +234,7 @@ int main(int argc, char *argv[]) {
 			while ((a = getch()) != 27) {
 				switch (a) {
 				case 119: /* w */
+					/*TODO: ADD SUPPORT FOR ARROW KEYS */
 					if (ED.disp > 0) {
 						ED.disp--;
 					}
@@ -163,6 +243,7 @@ int main(int argc, char *argv[]) {
 					if (ED.disp+ED.dispLength < ED.linemax) {
 						ED.disp++;						
 					}
+					break;
 				default:
 					break;
 				}
