@@ -12,6 +12,7 @@ void refresh_screen(void);
 int getch(void);
 
 /* utility */
+int calc_maxdisp(void);
 int file_exist(const char *filename);
 void init(int argc, char **argv);
 

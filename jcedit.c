@@ -60,6 +60,10 @@ int getch(void) {
 
 /*** utility ***/
 
+int calc_maxdisp(void) {
+	return (ED.disp+ED.dispLength > ED.linemax) ? ED.linemax : ED.disp+ED.dispLength;
+}
+
 int file_exist(const char * filename) {
 	/* try to open file to read */
 	FILE *file;
@@ -153,9 +157,10 @@ int main(int argc, char *argv[]) {
 				}
 
 				refresh_screen();
-				
+	
 				if (ED.linemax > 0) {
-					for (int i = ED.disp; i<ED.disp+ED.dispLength; i++) {
+					int maxdisp = calc_maxdisp();
+					for (int i = ED.disp; i < maxdisp; i++) {
 						printf("%d| %s\n", i, full_file[i]);					
 					}
 				}
@@ -188,10 +193,10 @@ int main(int argc, char *argv[]) {
 			printf("FILENAME: %s | LINEMAX: %d \n",ED.filename,ED.linemax);
   
 			if(ED.linemax>=1) {
-      				printf("\n");
-      				int maxShow = (ED.linemax < ED.disp+ED.dispLength) ? ED.linemax:ED.disp+ED.dispLength;
+				printf("\n");
+				int maxdisp = calc_maxdisp();						
 				
-				for(int i=ED.disp;i<maxShow;i+=1){
+				for(int i=ED.disp;i<maxdisp;i+=1){
         				printf("%d| %s\n",i,full_file[i]);
 				}
 			}
@@ -210,8 +215,7 @@ int main(int argc, char *argv[]) {
       
 			}
     
-    			full_file = realloc(full_file, sizeof(char*)*(ED.linemax+1));
-
+			full_file = realloc(full_file, sizeof(char*)*(ED.linemax+1));
 		}
   
 		ED.cmd = 0;
