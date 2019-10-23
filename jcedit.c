@@ -17,6 +17,8 @@ enum keys {
 	ARROW_RIGHT,
 	ARROW_UP,
 	ARROW_DOWN,
+	HOME_KEY,
+	END_KEY
 };
 
 
@@ -64,10 +66,10 @@ void refresh_screen(void) {
 int process_keypress(void) {
 	int nread;
 	char c;
-	while ((nread = read(STDIN_FILENO, &c, 1) != 1)
+	while ((nread = read(STDIN_FILENO, &c, 1) != 1))
 		; /* TODO: ADD ERROR CHECKING HERE */
 	
-	if(c = '\x1b') { /* \x1b is 27 in hex */
+	if(c == '\x1b') { /* \x1b is 27 in hex */
 		DBGS("we have an escape sequence");
 		char seq[3];
 		if (read(STDIN_FILENO, &seq[0], 1) != 1) {
@@ -85,14 +87,15 @@ int process_keypress(void) {
 						return '\x1b';
 					}
 					
-					switch(seq[2] == '~') {
-						/* TODO: finsish processing for keys with a 4-byte escape sequence */					
-					case '1':
-					case '8':
-					default:
-						break;
-					}	
-									
+					if (seq[2] == '~'){
+						switch(seq[2]) {
+							/* TODO: finsish processing for keys with a 4-byte escape sequence */					
+						case '1':
+						case '8':
+						default:
+							break;
+						}	
+				 }				
 				} else {
 					switch (seq[1]) {
 					case 'A':
@@ -115,7 +118,7 @@ int process_keypress(void) {
 						
 			case 0:
 				DBGS("next char is a 0");
-				switch (ch[1]) {
+				switch (seq[1]) {
 				case 'H':
 					return HOME_KEY;
 				case 'F':
@@ -126,23 +129,26 @@ int process_keypress(void) {
 				return '\x1b';
 		}
 	} else {
-		return ch;	
+		return c;	
 	}
 }
 
 int getch(void) {
 	struct termios oldattr, newattr;
+	
 	int ch;
 
 	tcgetattr(STDIN_FILENO, &oldattr);
 	newattr = oldattr;
 	newattr.c_lflag &= ~(ICANON | ECHO);
+	newattr.c_cc[VMIN] = 0; /*	Read requires 0 bytes to return */
+	newattr.c_cc[VTIME] = 0; /* Set timeout of 0 seconds */
 	tcsetattr(STDIN_FILENO, TCSANOW, &newattr);
 	
 	ch = process_keypress();
 
 	tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);
-	
+
 	return ch;
 }
 
