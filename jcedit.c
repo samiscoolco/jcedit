@@ -13,12 +13,17 @@
 #define DBGS(s) printf("%s\n", s)
 
 enum keys {
-	ARROW_LEFT = 1000,
-	ARROW_RIGHT,
-	ARROW_UP,
-	ARROW_DOWN,
-	HOME_KEY,
-	END_KEY
+	BACKSPACE = 127,
+        ARROW_LEFT = 1000,
+        ARROW_RIGHT,
+        ARROW_UP,
+        ARROW_DOWN,
+        DEL_KEY,
+        HOME_KEY,
+        END_KEY,
+        PAGE_UP,
+        PAGE_DOWN,
+        INSERT_KEY
 };
 
 
@@ -48,6 +53,12 @@ void show_help(void){
 
 /*** i/o ***/
 
+void print_file(char **file, int i, int x) {
+	for (i;i<x;i++) {
+		printf("%3d| %s\n", i, file[i]);
+	}
+}
+
 void clear(void) {    
 	printf("\x1b[?251\x1b[2J\x1b[H\x1b[?25h");
 }
@@ -72,63 +83,47 @@ int process_keypress(void) {
 	if(c == '\x1b') { /* \x1b is 27 in hex */
 		DBGS("we have an escape sequence");
 		char seq[3];
-		if (read(STDIN_FILENO, &seq[0], 1) != 1) {
-			return '\x1b';
-		}
-		if (read(STDIN_FILENO, &seq[1], 1) != 1) {
-			return '\x1b';
-		}
+		if (read(STDIN_FILENO, &seq[0], 1) != 1) { return '\x1b'; }
+		if (read(STDIN_FILENO, &seq[1], 1) != 1) { return '\x1b'; }
 
-		switch(seq[0]) {
-			case '[':
-				DBGS("next char is the [");
-				if (seq[1] >= 0 && seq[1] <= 9) {
-					if (read(STDIN_FILENO, &seq[2], 1) != 1) {
-						return '\x1b';
-					}
-					
-					if (seq[2] == '~'){
-						switch(seq[2]) {
-							/* TODO: finsish processing for keys with a 4-byte escape sequence */					
-						case '1':
-						case '8':
-						default:
-							break;
-						}	
-				 }				
-				} else {
-					switch (seq[1]) {
-					case 'A':
-						return ARROW_UP;
-						break;
-					case 'B':
-						return ARROW_DOWN;
-						break;
-					case 'C':
-						return ARROW_RIGHT;
-						break;
-					case 'D':
-						return ARROW_LEFT;
-						break;
-					default:
-						break;
-					}
-				}	
-				break;
-						
-			case 0:
-				DBGS("next char is a 0");
-				switch (seq[1]) {
-				case 'H':
-					return HOME_KEY;
-				case 'F':
-					return END_KEY;
+		if (seq[0] == '[') {
+			DBGS("SECOND CHAR IS [");
+			if (seq[1] >= '0' && seq[1] <= '9') {
+				if (read(STDIN_FILENO, &seq[2], 1) != 1) {
+					return '\x1b';
 				}
-				break;
-			default:
-				return '\x1b';
-		}
+				if (seq[2] == '~'){
+					switch(seq[1]) {	
+					case '1': return HOME_KEY;
+					case '2': return INSERT_KEY;
+					case '3': goto ret; /* del_key */
+					case '4': return END_KEY;
+					case '5': return PAGE_UP;
+					case '6': return PAGE_DOWN;
+					case '7': return HOME_KEY;
+					case '8': return END_KEY;
+					}	
+			 	}					
+			} else {
+				switch (seq[1]) {
+				case 'A': return ARROW_UP;
+				case 'B': return ARROW_DOWN;
+				case 'C': return ARROW_RIGHT;
+				case 'D': return ARROW_LEFT;
+				case 'H': return HOME_KEY;
+				case 'F': return END_KEY;
+				case 'P': return DEL_KEY;
+				}
+			}	
+		} else if (seq[0] == 0) {			
+			switch (seq[1]) {
+			case 'H': return HOME_KEY;
+			case 'F': return END_KEY;
+			}
+		} 
+		return '\x1b';
 	} else {
+		ret:
 		return c;	
 	}
 }
@@ -174,7 +169,7 @@ void init(int argc, char **argv){
 	ED.clinenum = 0;
 	ED.cmd = 0;
 	ED.disp = 0;
-	ED.dispLength = 20;
+	ED.dispLength = 50;
 	ED.filename = NULL;
 
 	/* write header */
@@ -220,7 +215,9 @@ int main(int argc, char *argv[]) {
 	int run = 1;
 	refresh_screen();
 	while (run) {
-		printf("%d| ", ED.clinenum);
+		refresh_screen();
+		print_file(full_file, ED.disp, calc_maxdisp());
+		printf("\n%3d| ", ED.clinenum);
 		fgets(clinetext,100,stdin);
 		clinetext[strcspn(clinetext, "\n")] = '\0';
 
@@ -234,20 +231,32 @@ int main(int argc, char *argv[]) {
 		}
 		
 		if (strcmp(clinetext, ".mv") == 0) {
-			ED.cmd=1;
 			int a;
-
+			ED.cmd = 1;
 			while ((a = getch()) != 27) {
 				switch (a) {
 				case 119: /* w */
-					/*TODO: ADD SUPPORT FOR ARROW KEYS */
+				case ARROW_UP:
 					if (ED.disp > 0) {
 						ED.disp--;
 					}
 					break;
 				case 115: /* s */
+				case ARROW_DOWN:
 					if (ED.disp+ED.dispLength < ED.linemax) {
 						ED.disp++;						
+					}
+					break;
+				case PAGE_UP:
+					if (ED.disp - ED.dispLength < 0) {
+						ED.disp = 0;
+					} else {
+						ED.disp -= ED.dispLength;					
+					}
+					break;
+				case PAGE_DOWN:
+					if (ED.disp+ED.dispLength < ED.linemax) {
+						ED.disp += ED.dispLength;
 					}
 					break;
 				default:
@@ -258,13 +267,10 @@ int main(int argc, char *argv[]) {
 	
 				if (ED.linemax > 0) {
 					int maxdisp = calc_maxdisp();
-					for (int i = ED.disp; i < maxdisp; i++) {
-						printf("%d| %s\n", i, full_file[i]);					
-					}
+					printf("%d, %d\n", ED.disp, maxdisp);
+					print_file(full_file, ED.disp, maxdisp);
 				}
 			}
-			refresh_screen();
-			strcpy(clinetext,".ls");
 		}
 		
 		if (strcmp(clinetext, ".ln") == 0){
