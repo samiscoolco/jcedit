@@ -57,6 +57,7 @@ void print_file(char **file, int i, int x) {
 	for (i;i<x;i++) {
 		printf("%3d| %s\n", i, file[i]);
 	}
+	printf("He;;pasgfsdpk g");
 }
 
 void clear(void) {    
@@ -128,7 +129,7 @@ int process_keypress(void) {
 	}
 }
 
-int getch(void) {
+int getch(int b) {
 	struct termios oldattr, newattr;
 	
 	int ch;
@@ -136,7 +137,7 @@ int getch(void) {
 	tcgetattr(STDIN_FILENO, &oldattr);
 	newattr = oldattr;
 	newattr.c_lflag &= ~(ICANON | ECHO);
-	newattr.c_cc[VMIN] = 0; /*	Read requires 0 bytes to return */
+	newattr.c_cc[VMIN] = b; /*	Read requires 0 bytes to return */
 	newattr.c_cc[VTIME] = 0; /* Set timeout of 0 seconds */
 	tcsetattr(STDIN_FILENO, TCSANOW, &newattr);
 	
@@ -214,11 +215,25 @@ int main(int argc, char *argv[]) {
 	init(argc,argv);
 	int run = 1;
 	refresh_screen();
+	
+	char a = ' ';
+	char *aa = malloc(32);
+	int i = 0;
 	while (run) {
-		refresh_screen();
 		print_file(full_file, ED.disp, calc_maxdisp());
-		printf("\n%3d| ", ED.clinenum);
-		fgets(clinetext,100,stdin);
+		printf("\n%3d| \n", ED.clinenum);
+		i = 0;
+		//*aa = malloc(32);
+		while(a!='\n'){
+			//getchar();
+			a = getch(1);
+			printf("%c",a);
+			if (a == 27){break;}
+			aa[i++]=a;
+		}
+		a = ' ';
+		aa[i]= '\0';
+		strcpy(clinetext,aa);
 		clinetext[strcspn(clinetext, "\n")] = '\0';
 
   		if (strcmp(clinetext, "..?") == 0){
@@ -233,7 +248,7 @@ int main(int argc, char *argv[]) {
 		if (strcmp(clinetext, ".mv") == 0) {
 			int a;
 			ED.cmd = 1;
-			while ((a = getch()) != 27) {
+			while ((a = getch(0)) != 27) {
 				switch (a) {
 				case 119: /* w */
 				case ARROW_UP:
@@ -324,6 +339,7 @@ int main(int argc, char *argv[]) {
   
 		ED.cmd = 0;
 		fflush(stdin);
+		refresh_screen();
 	}
 
 	return 0;

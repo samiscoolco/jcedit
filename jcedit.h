@@ -14,7 +14,7 @@
 void clear(void);
 void print_top(void);
 void refresh_screen(void);
-int getch(void);
+int getch(int b);
 
 /* utility */
 int calc_maxdisp(void);
