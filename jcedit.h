@@ -15,7 +15,7 @@ void clear(void);
 void print_top(void);
 void refresh_screen(void);
 int getch(int b);
-
+char* text_entry(void);
 /* utility */
 int calc_maxdisp(void);
 int file_exist(const char *filename);

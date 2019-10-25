@@ -211,6 +211,21 @@ void init(int argc, char **argv){
 	
 }
 
+char* text_entry(void){
+	int cur_char = 0;
+	char *output = malloc(1);
+	char entry = ' ';
+	while(entry!='\n'){
+		entry = getch(0);
+		printf("%c",entry);
+		output[cur_char++]=entry;	
+		//resize string (change after advanced manipulation is added)
+		output = realloc(output,cur_char+1);
+	}
+	output[cur_char] = '\0';
+	return output;
+}
+
 /*** main ***/
 
 int main(int argc, char *argv[]) {
@@ -223,19 +238,9 @@ int main(int argc, char *argv[]) {
 	int i = 0;
 	while (run) {
 		print_file(full_file, ED.disp, calc_maxdisp());
-		printf("%3d| ", ED.clinenum);
-		i = 0;
-		//*aa = malloc(32);
-		while(a!='\n'){
-			//getchar();
-			a = getch(0);
-			printf("%c",a);
-			if (a == 27){break;}
-			aa[i++]=a;
-		}
-		a = ' ';
-		aa[i]= '\0';
-		strcpy(clinetext,aa);
+		printf("\n%3d| ", ED.clinenum);
+		
+		strcpy(clinetext,text_entry());
 		clinetext[strcspn(clinetext, "\n")] = '\0';
 
   		if (strcmp(clinetext, "..?") == 0){
@@ -281,12 +286,14 @@ int main(int argc, char *argv[]) {
 				}
 
 				refresh_screen();
-	
+				
+				
 				if (ED.linemax > 0) {
 					int maxdisp = calc_maxdisp();
-					printf("%d, %d\n", ED.disp, maxdisp);
+					//printf("%d, %d\n", ED.disp, maxdisp); /* show file coords (option or add to header ??) */
 					print_file(full_file, ED.disp, maxdisp);
 				}
+				
 			}
 		}
 		
