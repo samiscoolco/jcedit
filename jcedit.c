@@ -14,16 +14,16 @@
 
 enum keys {
 	BACKSPACE = 127,
-        ARROW_LEFT = 1000,
-        ARROW_RIGHT,
-        ARROW_UP,
-        ARROW_DOWN,
-        DEL_KEY,
-        HOME_KEY,
-        END_KEY,
-        PAGE_UP,
-        PAGE_DOWN,
-        INSERT_KEY
+	ARROW_LEFT = 1000,
+	ARROW_RIGHT,
+	ARROW_UP,
+	ARROW_DOWN,
+	DEL_KEY,
+	HOME_KEY,
+	END_KEY,
+	PAGE_UP,
+	PAGE_DOWN,
+	INSERT_KEY
 };
 
 
@@ -169,7 +169,7 @@ void init(int argc, char **argv){
 	ED.clinenum = 0;
 	ED.cmd = 0;
 	ED.disp = 0;
-	ED.dispLength = 50;
+	ED.dispLength = DISP_HEIGHT;
 	ED.filename = NULL;
 
 	/* write header */
