@@ -57,7 +57,6 @@ void print_file(char **file, int i, int x) {
 	for (i;i<x;i++) {
 		printf("%3d| %s\n", i, file[i]);
 	}
-	printf("He;;pasgfsdpk g");
 }
 
 void clear(void) {    
@@ -81,9 +80,12 @@ int process_keypress(void) {
 	while ((nread = read(STDIN_FILENO, &c, 1) != 1))
 		; /* TODO: ADD ERROR CHECKING HERE */
 	
+	
+	
 	if(c == '\x1b') { /* \x1b is 27 in hex */
 		DBGS("we have an escape sequence");
 		char seq[3];
+
 		if (read(STDIN_FILENO, &seq[0], 1) != 1) { return '\x1b'; }
 		if (read(STDIN_FILENO, &seq[1], 1) != 1) { return '\x1b'; }
 
@@ -133,14 +135,14 @@ int getch(int b) {
 	struct termios oldattr, newattr;
 	
 	int ch;
-
 	tcgetattr(STDIN_FILENO, &oldattr);
 	newattr = oldattr;
 	newattr.c_lflag &= ~(ICANON | ECHO);
 	newattr.c_cc[VMIN] = b; /*	Read requires 0 bytes to return */
 	newattr.c_cc[VTIME] = 0; /* Set timeout of 0 seconds */
 	tcsetattr(STDIN_FILENO, TCSANOW, &newattr);
-	
+
+	getchar();
 	ch = process_keypress();
 
 	tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);
@@ -221,12 +223,12 @@ int main(int argc, char *argv[]) {
 	int i = 0;
 	while (run) {
 		print_file(full_file, ED.disp, calc_maxdisp());
-		printf("\n%3d| \n", ED.clinenum);
+		printf("%3d| ", ED.clinenum);
 		i = 0;
 		//*aa = malloc(32);
 		while(a!='\n'){
 			//getchar();
-			a = getch(1);
+			a = getch(0);
 			printf("%c",a);
 			if (a == 27){break;}
 			aa[i++]=a;
