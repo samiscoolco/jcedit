@@ -8,7 +8,7 @@
 
 #include "jcedit.h"
 
-#define VERNO "3.5"
+#define VERNO "3.5.2"
 
 #define DBGS(s) printf("%s\n", s)
 
@@ -74,7 +74,7 @@ void refresh_screen(void) {
 	//maybe going to add ls call here once its functionalized.
 }
 
-int process_keypress(void) {
+int process_keypress(int no_esc) {
 	int nread;
 	char c;
 	while ((nread = read(STDIN_FILENO, &c, 1) != 1))
@@ -131,7 +131,7 @@ int process_keypress(void) {
 	}
 }
 
-int getch(int b) {
+int getch(int b, int no_esc) {
 	struct termios oldattr, newattr;
 	
 	int ch;
@@ -143,7 +143,7 @@ int getch(int b) {
 	tcsetattr(STDIN_FILENO, TCSANOW, &newattr);
 
 	getchar();
-	ch = process_keypress();
+	ch = process_keypress(no_esc);
 
 	tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);
 
@@ -216,7 +216,7 @@ char* text_entry(void){
 	char *output = malloc(1);
 	char entry = ' ';
 	while(entry!='\n'){
-		entry = getch(0);
+		entry = getch(0,1);
 		printf("%c",entry);
 		output[cur_char++]=entry;	
 		//resize string (change after advanced manipulation is added)
@@ -255,7 +255,7 @@ int main(int argc, char *argv[]) {
 		if (strcmp(clinetext, ".mv") == 0) {
 			int a;
 			ED.cmd = 1;
-			while ((a = getch(0)) != 27) {
+			while ((a = getch(0,1)) != 27) {
 				switch (a) {
 				case 119: /* w */
 				case ARROW_UP:
@@ -290,7 +290,7 @@ int main(int argc, char *argv[]) {
 				
 				if (ED.linemax > 0) {
 					int maxdisp = calc_maxdisp();
-					//printf("%d, %d\n", ED.disp, maxdisp); /* show file coords (option or add to header ??) */
+					//printf("%d, %d\n", ED.disp, maxdisp); /* show file coords (make optional or add to the header at top of screen) */
 					print_file(full_file, ED.disp, maxdisp);
 				}
 				
@@ -353,3 +353,4 @@ int main(int argc, char *argv[]) {
 
 	return 0;
 }
+
