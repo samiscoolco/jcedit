@@ -55,7 +55,14 @@ void show_help(void){
 
 void print_file(char **file, int i, int x) {
 	for (i;i<x;i++) {
+		if (ED.clinenum == i){
+			printf("\x1b[1m%3d\x1b[0m| %s\n", i, file[i]);
+		}else
 		printf("%3d| %s\n", i, file[i]);
+	}
+	if (ED.clinenum==ED.linemax){
+		//if we are editing the newest line
+		printf("\x1b[1m%3d\x1b[0m| \n",ED.linemax);
 	}
 }
 
@@ -64,8 +71,10 @@ void clear(void) {
 }
 
 void print_top(void) {
+	printf("\033[96m");
 	printf("%s \n",header);
 	printf("FILENAME: %s | LINEMAX: %d\n\n",ED.filename,ED.linemax);
+	printf("\x1b[0m");
 }
 
 void refresh_screen(void) {
@@ -214,7 +223,7 @@ int main(int argc, char *argv[]) {
 	init(argc,argv);
 	int run = 1;
 	refresh_screen();
-	while (run) {
+	while (run) {	
 		refresh_screen();
 		print_file(full_file, ED.disp, calc_maxdisp());
 		printf("\n%3d| ", ED.clinenum);
@@ -237,14 +246,24 @@ int main(int argc, char *argv[]) {
 				switch (a) {
 				case 119: /* w */
 				case ARROW_UP:
-					if (ED.disp > 0) {
-						ED.disp--;
+					if (ED.clinenum > ED.disp) {
+						ED.clinenum -=1;
+					}else{
+						int val = 0;
+						val = (ED.disp)?1:0;
+						ED.disp-=val;ED.clinenum-=val;
 					}
 					break;
 				case 115: /* s */
 				case ARROW_DOWN:
-					if (ED.disp+ED.dispLength < ED.linemax) {
-						ED.disp++;						
+					if (ED.linemax>ED.clinenum){
+					if (ED.clinenum<ED.disp+ED.dispLength -1 ) {
+						ED.clinenum +=1;
+					}else{
+						int val = 0;
+						val = (ED.clinenum!=ED.linemax)?1:0;
+						ED.disp+=val;ED.clinenum+=val;
+						}
 					}
 					break;
 				case PAGE_UP:
@@ -262,12 +281,11 @@ int main(int argc, char *argv[]) {
 				default:
 					break;
 				}
-
 				refresh_screen();
 	
 				if (ED.linemax > 0) {
 					int maxdisp = calc_maxdisp();
-					printf("%d, %d\n", ED.disp, maxdisp);
+					//printf("%d, %d\n", ED.disp, maxdisp);
 					print_file(full_file, ED.disp, maxdisp);
 				}
 			}

@@ -5,7 +5,7 @@
 
 /*** defines ***/
 
-#define DISP_HEIGHT 20
+#define DISP_HEIGHT 25
 
 
 /*** functions ***/
