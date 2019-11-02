@@ -56,13 +56,13 @@ void show_help(void){
 void print_file(char **file, int i, int x) {
 	for (i;i<x;i++) {
 		if (ED.clinenum == i){
-			printf("\x1b[1m%3d\x1b[0m| %s\n", i, file[i]);
+printf("\x1b[33;1m%3d\x1b[0m| %s\n",i,file[i]);
 		}else
 		printf("%3d| %s\n", i, file[i]);
 	}
 	if (ED.clinenum==ED.linemax){
 		//if we are editing the newest line
-		printf("\x1b[1m%3d\x1b[0m| \n",ED.linemax);
+printf("\x1b[33;1m%3d\x1b[0m| \n",ED.linemax);
 	}
 }
 
