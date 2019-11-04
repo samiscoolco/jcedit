@@ -7,10 +7,13 @@
 #include <stdlib.h>
 
 #include "jcedit.h"
+#include "syntax.h"
 
-#define VERNO "3.5"
+#define VERNO "3.6"
 
 #define DBGS(s) printf("%s\n", s)
+#define DBGI(i) printf("%d\n", i)
+
 
 enum keys {
 	BACKSPACE = 127,
@@ -39,7 +42,7 @@ struct editorData{
 char header[50];
 struct editorData ED;
 char **full_file = NULL;
-char clinetext[100];
+char clinetext[1001];
 char lineJump[5];
 
 /*** etc ***/
@@ -54,15 +57,18 @@ void show_help(void){
 /*** i/o ***/
 
 void print_file(char **file, int i, int x) {
+	char* printed = NULL;
 	for (i;i<x;i++) {
+		printed = malloc(sizeof(file[i]));
+		printed = highlight_syntax(file[i]);
 		if (ED.clinenum == i){
-			printf("\x1b[1m%3d\x1b[0m| %s\n", i, file[i]);
+printf("\x1b[33;1m%3d\x1b[0m| %s\n",i,printed);
 		}else
-		printf("%3d| %s\n", i, file[i]);
+		printf("%3d| %s\n", i,printed);
 	}
 	if (ED.clinenum==ED.linemax){
 		//if we are editing the newest line
-		printf("\x1b[1m%3d\x1b[0m| \n",ED.linemax);
+printf("\x1b[33;1m%3d\x1b[0m| \n",ED.linemax);
 	}
 }
 
@@ -73,7 +79,7 @@ void clear(void) {
 void print_top(void) {
 	printf("\033[96m");
 	printf("%s \n",header);
-	printf("FILENAME: %s | LINEMAX: %d\n\n",ED.filename,ED.linemax);
+	printf("FILENAME: %s | LINEMAX: %d | CUR_LINE: %d\n\n",ED.filename,ED.linemax,ED.clinenum);
 	printf("\x1b[0m");
 }
 
@@ -162,7 +168,7 @@ int calc_maxdisp(void) {
 	return (ED.disp+ED.dispLength > ED.linemax) ? ED.linemax : ED.disp+ED.dispLength;
 }
 
-int file_exist(const char * filename) {
+int file_exist(const char* filename) {
 	/* try to open file to read */
 	FILE *file;
 	if (file = fopen(filename, "r")) {
@@ -172,7 +178,7 @@ int file_exist(const char * filename) {
 	return 0;
 }
 
-void init(int argc, char **argv){
+void init(int argc, char** argv){
 	//init variables
 	ED.linemax = 0;
 	ED.clinenum = 0;
@@ -227,7 +233,7 @@ int main(int argc, char *argv[]) {
 		refresh_screen();
 		print_file(full_file, ED.disp, calc_maxdisp());
 		printf("\n%3d| ", ED.clinenum);
-		fgets(clinetext,100,stdin);
+		fgets(clinetext,1001,stdin);
 		clinetext[strcspn(clinetext, "\n")] = '\0';
 
   		if (strcmp(clinetext, "..?") == 0){
@@ -256,13 +262,12 @@ int main(int argc, char *argv[]) {
 					break;
 				case 115: /* s */
 				case ARROW_DOWN:
-					if (ED.linemax>ED.clinenum){
+					if (ED.linemax-1>=ED.clinenum){
 					if (ED.clinenum<ED.disp+ED.dispLength -1 ) {
 						ED.clinenum +=1;
 					}else{
-						int val = 0;
-						val = (ED.clinenum!=ED.linemax)?1:0;
-						ED.disp+=val;ED.clinenum+=val;
+						ED.disp+=1;
+						ED.clinenum+=1;
 						}
 					}
 					break;
@@ -328,16 +333,13 @@ int main(int argc, char *argv[]) {
   
   
 		if (ED.cmd == 0) {
-    			full_file[ED.clinenum] = malloc(strlen(clinetext)+1);
-			full_file[ED.clinenum] = strdup(clinetext);
-			ED.clinenum+=1;
-			
-			if (ED.clinenum>ED.linemax){
-      				ED.linemax+=1;
-      
+			if (ED.clinenum==ED.linemax){
+				full_file = realloc(full_file, sizeof(char*)*(++ED.linemax));
+				ED.disp++;
 			}
-    
-			full_file = realloc(full_file, sizeof(char*)*(ED.linemax+1));
+    	full_file[ED.clinenum] = malloc(strlen(clinetext)+1);
+			full_file[ED.clinenum] = strdup(clinetext);
+			ED.clinenum+=1;		
 		}
   
 		ED.cmd = 0;
