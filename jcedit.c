@@ -59,16 +59,14 @@ void show_help(void){
 void print_file(char **file, int i, int x) {
 	char* printed = NULL;
 	for (i;i<x;i++) {
-		printed = malloc(sizeof(file[i]));
-		printed = highlight_syntax(file[i]);
 		if (ED.clinenum == i){
-printf("\x1b[33;1m%3d\x1b[0m| %s\n",i,printed);
-		}else
-		printf("%3d| %s\n", i,printed);
+			printf("\x1b[33;1m%3d\x1b[0m| ",i);
+		}else{printf("%3d| ", i);}
+		highlight_syntax(file[i]);
 	}
 	if (ED.clinenum==ED.linemax){
 		//if we are editing the newest line
-printf("\x1b[33;1m%3d\x1b[0m| \n",ED.linemax);
+		printf("\x1b[33;1m%3d\x1b[0m| \n",ED.linemax);
 	}
 }
 

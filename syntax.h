@@ -2,6 +2,6 @@
 #define SYNTAX_H
 
 /*** functions ***/
-char* highlight_syntax(char* inp);
+void highlight_syntax(char* inp);
 
 #endif
