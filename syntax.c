@@ -4,8 +4,8 @@
 
 #include "syntax.h"
 
-char *keywords[4] = {"if","else","break","continue"};
-char *colors[4] = {"\033[92m","\033[92m","\033[91m","\033[94m"};
+char *keywords[] = {"if","else","while","for","break","continue","signed","unsigned","int","char","short","long","float","double"};
+char *colors[] = {"\033[92m","\033[92m","\033[92m","\033[92m","\033[91m","\033[94m","\033[96m","\033[96m","\033[96m","\033[96m","\033[85m","\033[96m","\033[96m","\033[96m"};
 
 int check_syntax(char* full,int pos){
 	int equiv = 1;
