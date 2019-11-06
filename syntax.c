@@ -2,20 +2,40 @@
 #include <string.h>
 #include <stdlib.h>
 #include "syntax.h"
-
-#define RED "\033[91m"
-#define GREEN "\033[92m"
-#define BLUE "\033[96m"
-#define DARKBLUE "\033[94m"
-#define YELLOW "\033[93m"
-
 //this is for C
-char *keywords[] = {"if","else","while","for","enum","switch","break","return","continue","case","#define","#include","signed","unsigned","int","char","short","long","float","double","void","struct"};
-char *colors[] = {GREEN,GREEN,GREEN,GREEN,GREEN,GREEN,RED,RED,RED,RED,DARKBLUE,DARKBLUE,BLUE,BLUE,BLUE,BLUE,BLUE,BLUE,BLUE,BLUE,BLUE,BLUE};
+//char *keywords[] = {"if","else","while","for","enum","switch","break","return","continue","case","#define","#include","signed","unsigned","int","char","short","long","float","double","void","struct"};
+//char *colors[] = {GREEN,GREEN,GREEN,GREEN,GREEN,GREEN,RED,RED,RED,RED,DARKBLUE,DARKBLUE,BLUE,BLUE,BLUE,BLUE,BLUE,BLUE,BLUE,BLUE,BLUE,BLUE};
+//
 
+
+char **keywords = NULL;
+char **colors = NULL;
+
+char* get_color(char a){
+	switch(a){
+		case 'r':
+		return RED;
+		break;
+		case 'g':
+		return GREEN;
+		break;
+		case 'b':
+		return BLUE;
+		break;
+		case 'c':
+		return CYAN;
+		break;
+		case 'y':
+		return YELLOW;
+		break;
+		return YELLOW;
+	}
+	
+	
+}
 int check_syntax(char* full,int pos){
 	int equiv = 1;
-	for(int i = 0;i<sizeof(keywords)/sizeof(keywords[0]);i++){
+	for(int i = 0;keywords[i]!=NULL;i++){
 		equiv = 1;
 		if(full[pos] == keywords[i][0]){
 			for(int b = 0;b<strlen(keywords[i]);b++){

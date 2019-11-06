@@ -75,7 +75,7 @@ void clear(void) {
 }
 
 void print_top(void) {
-	printf("\033[96m");
+	printf(CYAN);
 	printf("%s \n",header);
 	printf("FILENAME: %s | LINEMAX: %d | CUR_LINE: %d\n\n",ED.filename,ED.linemax,ED.clinenum);
 	printf("\x1b[0m");
@@ -177,6 +177,25 @@ int file_exist(const char* filename) {
 }
 
 void init(int argc, char** argv){
+	
+	FILE *syn = fopen("c.syntax", "r");
+	char *keyw = malloc(32);
+	char  c = ' ';
+	int i=0;
+	keywords = NULL;
+	colors = NULL;
+	while(fscanf(syn,"%c %s\n",&c,keyw)!=-1){
+		keywords=realloc(keywords,sizeof(char*)*(i+1));
+		colors=realloc(colors,sizeof(char*)*(i+1));
+		keywords[i] = malloc(strlen(keyw));
+		colors[i] = malloc(strlen(RED));
+		keywords[i] = strdup(keyw);
+		colors[i] = strdup(get_color(c));
+		i++;
+	}
+	keywords=realloc(keywords,sizeof(char*)*(i+1));
+	fclose(syn);
+	
 	//init variables
 	ED.linemax = 0;
 	ED.clinenum = 0;
@@ -192,8 +211,8 @@ void init(int argc, char** argv){
  	if (argc > 1) {
 		ED.filename = argv[1];
 	} else {
-  		//file name prompt
-  		system("cls||clear");
+  	//file name prompt
+  	system("cls||clear");
 		printf("%s \nEnter file name: ",header);
 		ED.filename = malloc(50);
 		fgets(ED.filename,50,stdin);
