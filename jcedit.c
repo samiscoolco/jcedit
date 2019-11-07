@@ -229,7 +229,8 @@ void init(int argc, char** argv){
 		while ((len = getline(&line, &cap, fp)) != -1) {
 			full_file = realloc(full_file, sizeof(char*)*(ED.linemax+1));
 			full_file[ED.linemax] = malloc(len+1);
-			full_file[ED.linemax] = strndup(line,len-1);
+			if(line[len-1]=='\n'){line[len-1]='\0';}	//strip newline chars if they exist
+			full_file[ED.linemax] = strndup(line,len);
 			ED.linemax+=1;
 		}
 		
