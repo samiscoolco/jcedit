@@ -9,7 +9,7 @@
 #include "jcedit.h"
 #include "syntax.h"
 
-#define VERNO "3.6"
+#define VERNO "3.6.5"
 
 #define DBGS(s) printf("%s\n", s)
 #define DBGI(i) printf("%d\n", i)
@@ -352,7 +352,7 @@ int main(int argc, char *argv[]) {
 		if (ED.cmd == 0) {
 			if (ED.clinenum==ED.linemax){
 				full_file = realloc(full_file, sizeof(char*)*(++ED.linemax));
-				ED.disp++;
+				if(ED.disp+ED.dispLength<=ED.linemax){ED.disp++;}
 			}
     	full_file[ED.clinenum] = malloc(strlen(clinetext)+1);
 			full_file[ED.clinenum] = strdup(clinetext);
