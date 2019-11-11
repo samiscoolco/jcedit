@@ -48,7 +48,7 @@ char lineJump[5];
 /*** etc ***/
 void show_help(void){
 	clear();
-	printf("JCEdit Version %s\nWritten by sam0s & jdedmondt\n\n",VERNO);
+	printf("%s\nWritten by sam0s & jdedmondt\n\n",header);
 	printf("Commands:\n\t..? - Show this screen\n\t.qt - Close JCEdit\n\t.sv - Save currently open file\n\t.ls - List lines into display window\n\t.ln - Set current line number\n\t.mv - Use W and S to scroll around the display window\n\nPress enter to return...");
 	getchar();
 }
@@ -163,7 +163,7 @@ int getch(void) {
 /*** utility ***/
 
 int calc_maxdisp(void) {
-	return (ED.disp+ED.dispLength > ED.linemax) ? ED.linemax : ED.disp+ED.dispLength;
+	return (ED.disp+ED.dispLength > ED.linemax) ? ED.linemax : ED.disp+ED.dispLength; // change
 }
 
 int file_exist(const char* filename) {
@@ -193,6 +193,7 @@ void init(int argc, char** argv){
 		colors[i] = strdup(get_color(c));
 		i++;
 	}
+	free(keyw);
 	keywords=realloc(keywords,sizeof(char*)*(i+1));
 	fclose(syn);
 	
@@ -357,9 +358,9 @@ int main(int argc, char *argv[]) {
 			}
     	full_file[ED.clinenum] = malloc(strlen(clinetext)+1);
 			full_file[ED.clinenum] = strdup(clinetext);
-			ED.clinenum+=1;		
+			ED.clinenum+=1;
 		}
-  
+
 		ED.cmd = 0;
 		fflush(stdin);
 	}

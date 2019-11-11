@@ -2,15 +2,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include "syntax.h"
-//this is for C
-//char *keywords[] = {"if","else","while","for","enum","switch","break","return","continue","case","#define","#include","signed","unsigned","int","char","short","long","float","double","void","struct"};
-//char *colors[] = {GREEN,GREEN,GREEN,GREEN,GREEN,GREEN,RED,RED,RED,RED,DARKBLUE,DARKBLUE,BLUE,BLUE,BLUE,BLUE,BLUE,BLUE,BLUE,BLUE,BLUE,BLUE};
-//
-
 
 char **keywords = NULL;
 char **colors = NULL;
 
+//For reading the syntax file!!
 char* get_color(char a){
 	switch(a){
 		case 'r':
@@ -29,16 +25,16 @@ char* get_color(char a){
 		return YELLOW;
 		break;
 		return YELLOW;
-	}
-	
-	
+	}	
 }
+
 int check_syntax(char* full,int pos){
 	int equiv = 1;
+	int b=0;
 	for(int i = 0;keywords[i]!=NULL;i++){
 		equiv = 1;
 		if(full[pos] == keywords[i][0]){
-			for(int b = 0;b<strlen(keywords[i]);b++){
+			for(b = 0;b<strlen(keywords[i]);b++){
 				if (full[pos+b]!=keywords[i][b]){
 					equiv=0;break;}
 			}
@@ -51,7 +47,19 @@ int check_syntax(char* full,int pos){
 void highlight_syntax(char* inp){
 	for(int i=0;i<strlen(inp);i++){
 		int test = check_syntax(inp,i);
-		if (test!=-1){
+		
+		
+		//block highlighting to do
+		// if(inp[i]=='\"'){
+		// 	printf("%s",YELLOW);
+		// 	do {
+		// 		printf("%c",inp[i++]);
+		// 	}while(inp[i]!='\"' && inp[i]!='\0');
+		// 	printf("%c",inp[i++]);
+		// 	printf("\x1b[0m");
+		// }
+		
+		if (test>0){
 			printf("%s",colors[test]);
 			printf("%s",keywords[test]);
 			printf("\x1b[0m");
@@ -60,5 +68,4 @@ void highlight_syntax(char* inp){
 		printf("%c",inp[i]);
 	}
 	printf("\n");
-
 }
