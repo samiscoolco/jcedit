@@ -1,5 +1,6 @@
 /* jcedit.c */
 
+#include <sys/ioctl.h>
 #include <termios.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -8,6 +9,7 @@
 
 #include "jcedit.h"
 #include "syntax.h"
+#include "config.h"
 
 #define VERNO "3.6.5"
 
@@ -196,12 +198,26 @@ void init(int argc, char** argv){
 	keywords=realloc(keywords,sizeof(char*)*(i+1));
 	fclose(syn);
 	
+	int lim_display = LIMIT_DISPLAY;
+	struct winsize w;
+	
+	if (!lim_display) {
+	
+		/* attempt to get screen size with ioctl */
+		if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == -1) {
+			lim_display = 1;
+		}
+		
+	}
+	
+	
+	
 	//init variables
 	ED.linemax = 0;
 	ED.clinenum = 0;
 	ED.cmd = 0;
 	ED.disp = 0;
-	ED.dispLength = DISP_HEIGHT;
+	ED.dispLength = lim_display ? DISPLAY_LENGTH : w.ws_row-7;
 	ED.filename = NULL;
 
 	/* write header */
