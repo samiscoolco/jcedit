@@ -383,3 +383,8 @@ int main(int argc, char *argv[]) {
 
 	return 0;
 }
+// we ever gonna free tha memory doe?
+// it should also be noted that the screen should scroll
+// when the operating on the last line of the view, not just the file
+// once an insert function is added, jcedit will actually be usable
+// syntax highlighting is just a meme honestly

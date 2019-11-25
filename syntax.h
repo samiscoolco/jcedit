@@ -6,6 +6,7 @@
 #define CYAN "\033[96m"
 #define BLUE "\033[94m"
 #define YELLOW "\033[93m"
+#define PURPLE "\033[1;35m"
 
 /*** functions ***/
 void highlight_syntax(char* inp);

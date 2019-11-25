@@ -18,9 +18,10 @@ c float
 c long
 c unsigned
 c signed
-y jcedit
 c struct
 c void
 g green
 g if
-
+y jcedit
+p sam0s
+p jdedmondt

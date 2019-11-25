@@ -9,6 +9,9 @@ char **colors = NULL;
 //For reading the syntax file!!
 char* get_color(char a){
 	switch(a){
+		case 'p':
+		return PURPLE;
+		break;
 		case 'r':
 		return RED;
 		break;
@@ -47,17 +50,15 @@ int check_syntax(char* full,int pos){
 void highlight_syntax(char* inp){
 	for(int i=0;i<strlen(inp);i++){
 		int test = check_syntax(inp,i);
-		
-		
-		//block highlighting to do
-		// if(inp[i]=='\"'){
-		// 	printf("%s",YELLOW);
-		// 	do {
-		// 		printf("%c",inp[i++]);
-		// 	}while(inp[i]!='\"' && inp[i]!='\0');
-		// 	printf("%c",inp[i++]);
-		// 	printf("\x1b[0m");
-		// }
+		//this only works for quotes, but could be applied to other things eventually
+		if(inp[i]=='\"'){
+			printf("%s",YELLOW);
+			do {
+				printf("%c",inp[i++]);
+			}while(inp[i]!='\"' && inp[i]!='\0');
+			if(inp[i]=='\"'){printf("%c",inp[i++]);}
+			printf("\x1b[0m");
+		}
 		
 		if (test>0){
 			printf("%s",colors[test]);
