@@ -11,6 +11,7 @@
 #define VERNO "3.5"
 
 #define DBGS(s) printf("%s\n", s)
+#define DBGI(i) printf("%d\n", i);
 
 enum keys {
 	BACKSPACE = 127,
@@ -110,8 +111,7 @@ int process_keypress(void) {
 					case '5': return PAGE_UP;
 					case '6': return PAGE_DOWN;
 					case '7': return HOME_KEY;
-					case '8': return END_KEY;
-					}	
+					case '8': return END_KEY;					}	
 			 	}					
 			} else {
 				switch (seq[1]) {
@@ -237,6 +237,52 @@ int main(int argc, char *argv[]) {
 		}
 		if (strcmp(clinetext, ".qt") == 0){
 			run=0;ED.cmd=1;
+		}
+		
+		if (strcmp(clinetext, ".i") == 0) {
+			int a;
+			ED.cmd = 1;
+			char *cline = full_file[ED.clinenum];
+			int pos = 0;
+			while ((a = getch()) != 27) {
+				switch (a) {
+				case '\n':
+					cline = full_file[++ED.clinenum];
+					pos = 0;
+					break;
+				case ARROW_RIGHT:
+					if (pos < strlen(cline)-1) {
+						pos++;
+					}
+					break;
+				case ARROW_LEFT:
+					if (pos > 0) {
+						pos --;
+					}
+					break;
+				case BACKSPACE:
+					if (strlen(cline)-1 > 0 && pos > 0) {
+						pos--;
+					}
+				case DEL_KEY:
+					DBGI(strlen(cline));
+					for (int i = pos; i < strlen(cline)-1; i++) {
+						cline[i] = cline[i+1];
+					}
+					cline = realloc(cline, strlen(cline)-1);
+					cline[strlen(cline)-1] = '\0';
+					break;
+				default:
+					cline = realloc(cline, strlen(cline)+1);
+					memmove(cline + pos + 1, cline + pos, strlen(cline)-pos);
+					cline[pos++] = a;
+					break;
+				}
+				
+				refresh_screen();
+				printf("linelen %d\n", strlen(cline));
+				print_file(full_file, ED.disp, calc_maxdisp());
+			}
 		}
 		
 		if (strcmp(clinetext, ".mv") == 0) {
