@@ -265,16 +265,18 @@ int main(int argc, char *argv[]) {
 						pos--;
 					}
 				case DEL_KEY:
-					DBGI(strlen(cline));
-					for (int i = pos; i < strlen(cline)-1; i++) {
-						cline[i] = cline[i+1];
+					if (strlen(cline) > 1) {
+						memmove(cline + pos, cline + pos + 1, strlen(cline+pos+1));
+						cline = realloc(cline, strlen(cline)-1);
+						cline[strlen(cline)-1] = '\0';
+					} else {
+						cline = realloc(cline, 1);
+						cline[0] = '\0';
 					}
-					cline = realloc(cline, strlen(cline)-1);
-					cline[strlen(cline)-1] = '\0';
 					break;
 				default:
-					cline = realloc(cline, strlen(cline)+1);
-					memmove(cline + pos + 1, cline + pos, strlen(cline)-pos);
+					cline = realloc(cline, strlen(cline)+2);
+					memmove(cline + pos + 1, cline + pos, strlen(cline+pos));
 					cline[pos++] = a;
 					break;
 				}
