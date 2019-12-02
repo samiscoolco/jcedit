@@ -31,7 +31,6 @@ enum keys {
 	INSERT_KEY
 };
 
-
 struct editorData{
 	int linemax;
 	int clinenum;
@@ -210,8 +209,6 @@ void init(int argc, char** argv){
 		
 	}
 	
-	
-	
 	//init variables
 	ED.linemax = 0;
 	ED.clinenum = 0;
@@ -258,7 +255,6 @@ void init(int argc, char** argv){
 }
 
 /*** main ***/
-
 int main(int argc, char *argv[]) {
 	init(argc,argv);
 	int run = 1;
@@ -290,6 +286,14 @@ int main(int argc, char *argv[]) {
 					cline = full_file[++ED.clinenum];
 					pos = 0;
 					break;
+				case ARROW_UP:
+					cline = full_file[--ED.clinenum];
+					pos = 0;
+					break;
+				case ARROW_DOWN:
+					cline = full_file[++ED.clinenum];
+					pos = 0;
+					break;
 				case ARROW_RIGHT:
 					if (pos < strlen(cline)-1) {
 						pos++;
@@ -315,12 +319,12 @@ int main(int argc, char *argv[]) {
 					}
 					break;
 				default:
-					cline = realloc(cline, strlen(cline)+2);
-					memmove(cline + pos + 1, cline + pos, strlen(cline+pos));
+					cline = realloc(cline, strlen(cline));
+					//memmove(cline + pos + 1, cline + pos, strlen(cline+pos));
 					cline[pos++] = a;
 					break;
 				}
-				
+				full_file[ED.clinenum] = cline;
 				refresh_screen();
 				printf("linelen %d\n", strlen(cline));
 				print_file(full_file, ED.disp, calc_maxdisp());
