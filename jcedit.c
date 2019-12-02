@@ -1,5 +1,6 @@
 /* jcedit.c */
 
+#include <sys/ioctl.h>
 #include <termios.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -7,11 +8,18 @@
 #include <stdlib.h>
 
 #include "jcedit.h"
+#include "syntax.h"
+#include "config.h"
 
-#define VERNO "3.5"
+#define VERNO "3.6.5"
 
 #define DBGS(s) printf("%s\n", s)
+<<<<<<< HEAD
 #define DBGI(i) printf("%d\n", i);
+=======
+#define DBGI(i) printf("%d\n", i)
+
+>>>>>>> syntax_highlighting
 
 enum keys {
 	BACKSPACE = 127,
@@ -40,13 +48,13 @@ struct editorData{
 char header[50];
 struct editorData ED;
 char **full_file = NULL;
-char clinetext[100];
+char clinetext[1001];
 char lineJump[5];
 
 /*** etc ***/
 void show_help(void){
 	clear();
-	printf("JCEdit Version %s\nWritten by sam0s & jdedmondt\n\n",VERNO);
+	printf("%s\nWritten by sam0s & jdedmondt\n\n",header);
 	printf("Commands:\n\t..? - Show this screen\n\t.qt - Close JCEdit\n\t.sv - Save currently open file\n\t.ls - List lines into display window\n\t.ln - Set current line number\n\t.mv - Use W and S to scroll around the display window\n\nPress enter to return...");
 	getchar();
 }
@@ -55,8 +63,10 @@ void show_help(void){
 /*** i/o ***/
 
 void print_file(char **file, int i, int x) {
+	char* printed = NULL;
 	for (i;i<x;i++) {
 		if (ED.clinenum == i){
+<<<<<<< HEAD
 printf("\x1b[33;1m%3d\x1b[0m| %s\n",i,file[i]);
 		}else
 		printf("%3d| %s\n", i, file[i]);
@@ -64,6 +74,15 @@ printf("\x1b[33;1m%3d\x1b[0m| %s\n",i,file[i]);
 	if (ED.clinenum==ED.linemax){
 		//if we are editing the newest line
 printf("\x1b[33;1m%3d\x1b[0m| \n",ED.linemax);
+=======
+			printf("\x1b[33;1m%3d\x1b[0m| ",i);
+		}else{printf("%3d| ", i);}
+		highlight_syntax(file[i]);
+	}
+	if (ED.clinenum==ED.linemax){
+		//if we are editing the newest line
+		printf("\x1b[33;1m%3d\x1b[0m| \n",ED.linemax);
+>>>>>>> syntax_highlighting
 	}
 }
 
@@ -72,9 +91,9 @@ void clear(void) {
 }
 
 void print_top(void) {
-	printf("\033[96m");
+	printf(CYAN);
 	printf("%s \n",header);
-	printf("FILENAME: %s | LINEMAX: %d\n\n",ED.filename,ED.linemax);
+	printf("FILENAME: %s | LINEMAX: %d | CUR_LINE: %d\n\n",ED.filename,ED.linemax,ED.clinenum);
 	printf("\x1b[0m");
 }
 
@@ -159,10 +178,10 @@ int getch(void) {
 /*** utility ***/
 
 int calc_maxdisp(void) {
-	return (ED.disp+ED.dispLength > ED.linemax) ? ED.linemax : ED.disp+ED.dispLength;
+	return (ED.disp+ED.dispLength > ED.linemax) ? ED.linemax : ED.disp+ED.dispLength; // change
 }
 
-int file_exist(const char * filename) {
+int file_exist(const char* filename) {
 	/* try to open file to read */
 	FILE *file;
 	if (file = fopen(filename, "r")) {
@@ -172,13 +191,47 @@ int file_exist(const char * filename) {
 	return 0;
 }
 
-void init(int argc, char **argv){
+void init(int argc, char** argv){
+	
+	FILE *syn = fopen("c.syntax", "r");
+	char *keyw = malloc(32);
+	char  c = ' ';
+	int i=0;
+	keywords = NULL;
+	colors = NULL;
+	while(fscanf(syn,"%c %s\n",&c,keyw)!=-1){
+		keywords=realloc(keywords,sizeof(char*)*(i+1));
+		colors=realloc(colors,sizeof(char*)*(i+1));
+		keywords[i] = malloc(strlen(keyw));
+		colors[i] = malloc(strlen(RED));
+		keywords[i] = strdup(keyw);
+		colors[i] = strdup(get_color(c));
+		i++;
+	}
+	free(keyw);
+	keywords=realloc(keywords,sizeof(char*)*(i+1));
+	fclose(syn);
+	
+	int lim_display = LIMIT_DISPLAY;
+	struct winsize w;
+	
+	if (!lim_display) {
+	
+		/* attempt to get screen size with ioctl */
+		if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == -1) {
+			lim_display = 1;
+		}
+		
+	}
+	
+	
+	
 	//init variables
 	ED.linemax = 0;
 	ED.clinenum = 0;
 	ED.cmd = 0;
 	ED.disp = 0;
-	ED.dispLength = DISP_HEIGHT;
+	ED.dispLength = lim_display ? DISPLAY_LENGTH : w.ws_row-7;
 	ED.filename = NULL;
 
 	/* write header */
@@ -188,8 +241,8 @@ void init(int argc, char **argv){
  	if (argc > 1) {
 		ED.filename = argv[1];
 	} else {
-  		//file name prompt
-  		system("cls||clear");
+  	//file name prompt
+  	system("cls||clear");
 		printf("%s \nEnter file name: ",header);
 		ED.filename = malloc(50);
 		fgets(ED.filename,50,stdin);
@@ -206,7 +259,8 @@ void init(int argc, char **argv){
 		while ((len = getline(&line, &cap, fp)) != -1) {
 			full_file = realloc(full_file, sizeof(char*)*(ED.linemax+1));
 			full_file[ED.linemax] = malloc(len+1);
-			full_file[ED.linemax] = strndup(line,len-1);
+			if(line[len-1]=='\n'){line[len-1]='\0';}	//strip newline chars if they exist
+			full_file[ED.linemax] = strndup(line,len);
 			ED.linemax+=1;
 		}
 		
@@ -227,7 +281,7 @@ int main(int argc, char *argv[]) {
 		refresh_screen();
 		print_file(full_file, ED.disp, calc_maxdisp());
 		printf("\n%3d| ", ED.clinenum);
-		fgets(clinetext,100,stdin);
+		fgets(clinetext,1001,stdin);
 		clinetext[strcspn(clinetext, "\n")] = '\0';
 
   		if (strcmp(clinetext, "..?") == 0){
@@ -309,13 +363,12 @@ int main(int argc, char *argv[]) {
 					break;
 				case 115: /* s */
 				case ARROW_DOWN:
-					if (ED.linemax>ED.clinenum){
+					if (ED.linemax-1>=ED.clinenum){
 					if (ED.clinenum<ED.disp+ED.dispLength -1 ) {
 						ED.clinenum +=1;
 					}else{
-						int val = 0;
-						val = (ED.clinenum!=ED.linemax)?1:0;
-						ED.disp+=val;ED.clinenum+=val;
+						ED.disp+=1;
+						ED.clinenum+=1;
 						}
 					}
 					break;
@@ -381,21 +434,23 @@ int main(int argc, char *argv[]) {
   
   
 		if (ED.cmd == 0) {
-    			full_file[ED.clinenum] = malloc(strlen(clinetext)+1);
+			if (ED.clinenum==ED.linemax){
+				full_file = realloc(full_file, sizeof(char*)*(++ED.linemax));
+				if(ED.disp+ED.dispLength<=ED.linemax){ED.disp++;}
+			}
+    	full_file[ED.clinenum] = malloc(strlen(clinetext)+1);
 			full_file[ED.clinenum] = strdup(clinetext);
 			ED.clinenum+=1;
-			
-			if (ED.clinenum>ED.linemax){
-      				ED.linemax+=1;
-      
-			}
-    
-			full_file = realloc(full_file, sizeof(char*)*(ED.linemax+1));
 		}
-  
+
 		ED.cmd = 0;
 		fflush(stdin);
 	}
 
 	return 0;
 }
+// we ever gonna free tha memory doe?
+// it should also be noted that the screen should scroll
+// when the operating on the last line of the view, not just the file
+// once an insert function is added, jcedit will actually be usable
+// syntax highlighting is just a meme honestly

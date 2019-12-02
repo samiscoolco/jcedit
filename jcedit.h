@@ -3,11 +3,6 @@
 #ifndef JCEDIT_H
 #define JCEDIT_H
 
-/*** defines ***/
-
-#define DISP_HEIGHT 25
-
-
 /*** functions ***/
 
 /* i/o */

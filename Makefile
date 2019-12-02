@@ -8,8 +8,8 @@ TARGET = jcedit
 
 all: $(TARGET)
 
-$(TARGET): $(TARGET).c
-	$(CC) $(CFLAGS) -o $(TARGET) $(TARGET).c
+$(TARGET): $(TARGET).c syntax.c
+	$(CC) $(CFLAGS) -o $(TARGET) $(TARGET).c syntax.c
 
 clean:
 	$(RM) $(TARGET)
