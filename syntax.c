@@ -51,12 +51,12 @@ void highlight_syntax(char* inp){
 	for(int i=0;i<strlen(inp);i++){
 		int test = check_syntax(inp,i);
 		//this only works for quotes, but could be applied to other things eventually
-		if(inp[i]=='/'){
+		if(inp[i]=='\"'){
 			printf("%s",YELLOW);
 			do {
 				printf("%c",inp[i++]);
 			}while(inp[i]!='\"' && inp[i]!='\0');
-			if(inp[i]=='/'){printf("%c",inp[i++]);}
+			if(inp[i]=='\"'){printf("%c",inp[i++]);}
 			printf("\x1b[0m");
 		}
 		

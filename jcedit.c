@@ -14,12 +14,8 @@
 #define VERNO "3.6.5"
 
 #define DBGS(s) printf("%s\n", s)
-<<<<<<< HEAD
-#define DBGI(i) printf("%d\n", i);
-=======
 #define DBGI(i) printf("%d\n", i)
 
->>>>>>> syntax_highlighting
 
 enum keys {
 	BACKSPACE = 127,
@@ -66,15 +62,6 @@ void print_file(char **file, int i, int x) {
 	char* printed = NULL;
 	for (i;i<x;i++) {
 		if (ED.clinenum == i){
-<<<<<<< HEAD
-printf("\x1b[33;1m%3d\x1b[0m| %s\n",i,file[i]);
-		}else
-		printf("%3d| %s\n", i, file[i]);
-	}
-	if (ED.clinenum==ED.linemax){
-		//if we are editing the newest line
-printf("\x1b[33;1m%3d\x1b[0m| \n",ED.linemax);
-=======
 			printf("\x1b[33;1m%3d\x1b[0m| ",i);
 		}else{printf("%3d| ", i);}
 		highlight_syntax(file[i]);
@@ -82,7 +69,6 @@ printf("\x1b[33;1m%3d\x1b[0m| \n",ED.linemax);
 	if (ED.clinenum==ED.linemax){
 		//if we are editing the newest line
 		printf("\x1b[33;1m%3d\x1b[0m| \n",ED.linemax);
->>>>>>> syntax_highlighting
 	}
 }
 
