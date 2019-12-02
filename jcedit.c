@@ -311,14 +311,11 @@ int main(int argc, char *argv[]) {
 					break;
 				case ARROW_LEFT:
 					if (pos > 0) {
-						pos--;
+						pos --;
 					}
 					break;
-				case ARROW_UP:
-				case ARROW_DOWN:
-					break;
 				case BACKSPACE:
-					if (strlen(cline) > 1 && pos > 0) {
+					if (strlen(cline)-1 > 0 && pos > 0) {
 						pos--;
 					}
 				case DEL_KEY:
@@ -332,16 +329,14 @@ int main(int argc, char *argv[]) {
 					}
 					break;
 				default:
-					DBGS("attempting to realloc");
-					DBGI(strlen(cline)+1);
-					cline = realloc(cline, strlen(cline)+1);
-					memmove(cline + pos + 1, cline + pos, strlen(cline+pos)+1);
+					cline = realloc(cline, strlen(cline)+2);
+					memmove(cline + pos + 1, cline + pos, strlen(cline+pos));
 					cline[pos++] = a;
 					break;
 				}
 				
 				refresh_screen();
-				printf("linelen %d | pos %d\n", strlen(cline), pos);
+				printf("linelen %d\n", strlen(cline));
 				print_file(full_file, ED.disp, calc_maxdisp());
 			}
 		}
