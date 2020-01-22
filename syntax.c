@@ -1,13 +1,21 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "syntax.h"
 
 char **keywords = NULL;
 char **colors = NULL;
-
+int keywordlen = 0;
+int hi = 0;
 //For reading the syntax file!!
 char* get_color(char a){
+	if (a < 97){
+		char* ret = malloc(2);
+		ret[0] = tolower(a);
+		ret[1] = 'h';
+		return ret;
+	}
 	switch(a){
 		case 'p':
 		return PURPLE;
@@ -50,23 +58,33 @@ int check_syntax(char* full,int pos){
 void highlight_syntax(char* inp){
 	for(int i=0;i<strlen(inp);i++){
 		int test = check_syntax(inp,i);
-		//this only works for quotes, but could be applied to other things eventually
-		if(inp[i]=='\"'){
-			printf("%s",YELLOW);
-			do {
-				printf("%c",inp[i++]);
-			}while(inp[i]!='\"' && inp[i]!='\0');
-			if(inp[i]=='\"'){printf("%c",inp[i++]);}
-			printf("\x1b[0m");
-		}
 		
 		if (test>0){
+			if(colors[test][1] == 'h'){
+				if(hi==1){
+					hi=0;
+					printf("%c",inp[i]);
+					printf("\x1b[0m");
+					continue;
+				}
+				else{
+					hi=1;
+					printf("%s",get_color(colors[test][0]));
+				}
+			}
+			
+			if(hi==0){
 			printf("%s",colors[test]);
 			printf("%s",keywords[test]);
 			printf("\x1b[0m");
+			}
+			else{printf("%s",keywords[test]);}
+
 			i+=strlen(keywords[test]);
 		}
 		printf("%c",inp[i]);
 	}
+	printf("\x1b[0m");
 	printf("\n");
+	hi=0;
 }

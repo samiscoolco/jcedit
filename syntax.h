@@ -14,5 +14,6 @@ int check_syntax(char* full,int pos);
 char* get_color(char a);
 extern char **keywords;
 extern char **colors;
+extern int keywordlen;
 
 #endif

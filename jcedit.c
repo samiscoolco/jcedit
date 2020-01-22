@@ -178,7 +178,7 @@ int file_exist(const char* filename) {
 
 void init(int argc, char** argv){
 	
-	FILE *syn = fopen("c.syntax", "r");
+	FILE *syn = fopen("/bin/jcedit/notes.syntax", "r");
 	char *keyw = malloc(32);
 	char  c = ' ';
 	int i=0;
@@ -192,6 +192,7 @@ void init(int argc, char** argv){
 		keywords[i] = strdup(keyw);
 		colors[i] = strdup(get_color(c));
 		i++;
+		keywordlen++;
 	}
 	free(keyw);
 	keywords=realloc(keywords,sizeof(char*)*(i+1));
@@ -320,7 +321,7 @@ int main(int argc, char *argv[]) {
 					break;
 				default:
 					cline = realloc(cline, strlen(cline));
-					//memmove(cline + pos + 1, cline + pos, strlen(cline+pos));
+					memmove(cline + pos + 1, cline + pos, strlen(cline+pos));
 					cline[pos++] = a;
 					break;
 				}
