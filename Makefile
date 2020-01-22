@@ -1,7 +1,7 @@
 # compiler
 CC=gcc
 #flags
-CLFAGS= -Wall -Wextra -pedantic
+CLFAGS= -Wall -Wextra -pedantic -fsanitize=address
 
 # target executable
 TARGET = jcedit
