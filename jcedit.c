@@ -306,13 +306,18 @@ int main(int argc, char *argv[]) {
 					}
 					break;
 				case BACKSPACE:
-					if (strlen(cline)-1 > 0 && pos > 0) {
+					if (strlen(cline) > 0 && pos > 0) {
 						pos--;
+					} else {
+						break;
 					}
 				case DEL_KEY:
 					if (strlen(cline) > 1) {
 						memmove(cline + pos, cline + pos + 1, strlen(cline+pos+1));
-						cline = realloc(cline, strlen(cline)-1);
+						//cline = realloc(cline, strlen(cline)); 
+						/* a) this corrupts the heap, and then the next go around it doesn't work. b) something else
+						corrupts the heap, and then this doesn't work. if i get rid of this, we use a bit more memory 
+						but i don't have to deal with either option */
 						cline[strlen(cline)-1] = '\0';
 					} else {
 						cline = realloc(cline, 1);
@@ -320,8 +325,8 @@ int main(int argc, char *argv[]) {
 					}
 					break;
 				default:
-					cline = realloc(cline, strlen(cline));
-					memmove(cline + pos + 1, cline + pos, strlen(cline+pos));
+					cline = realloc(cline, strlen(cline)+2);
+					memmove(cline + pos + 1, cline + pos, strlen(cline)-pos+1);
 					cline[pos++] = a;
 					break;
 				}
