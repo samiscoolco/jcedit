@@ -19,6 +19,7 @@ void init(int argc, char **argv);
 
 struct editorData{
 	int linemax;
+	int mode;
 	int clinenum;
 	int cmd;
 	int disp;

@@ -209,6 +209,7 @@ void init(int argc, char** argv){
 	ED.linemax = 0;
 	ED.clinenum = 0;
 	ED.cmd = 0;
+	ED.mode = 0;
 	ED.disp = 0;
 	ED.dispLength = lim_display ? DISPLAY_LENGTH : w.ws_row-7;
 	ED.filename = NULL;
@@ -259,6 +260,7 @@ int main(int argc, char *argv[]) {
 		refresh_screen();
 		print_file(full_file, ED.disp, calc_maxdisp());
 		printf("\n%3d| ", ED.clinenum);
+		ED.mode=0;
 		fgets(clinetext,1001,stdin);
 		clinetext[strcspn(clinetext, "\n")] = '\0';
 
@@ -272,8 +274,11 @@ int main(int argc, char *argv[]) {
 		}
 		
 		if (strcmp(clinetext, ".i") == 0) {
+			ED.mode=1;
 			int a;
 			ED.cmd = 1;
+			refresh_screen();
+			print_file(full_file, ED.disp, calc_maxdisp());
 			char *cline = full_file[ED.clinenum];
 			ED.pos = 0;
 			while ((a = getch()) != 27) {
@@ -327,10 +332,9 @@ int main(int argc, char *argv[]) {
 				}
 				full_file[ED.clinenum] = cline;
 				refresh_screen();
-				printf("linelen %d\n", strlen(cline));
+				printf("linelen %ld\n", strlen(cline));
 				print_file(full_file, ED.disp, calc_maxdisp());
 			}
-			ED.pos=-1;
 		}
 		
 		if (strcmp(clinetext, ".mv") == 0) {
@@ -385,12 +389,12 @@ int main(int argc, char *argv[]) {
 		}
 		
 		if (strcmp(clinetext, ".ln") == 0){
+			ED.cmd=1; 	
 			fgets(lineJump,5,stdin);
 			ED.clinenum = atoi(lineJump);
 			if (ED.clinenum > ED.linemax) {ED.clinenum = ED.linemax;}
 			if (ED.clinenum < 0) {ED.clinenum = 0;}
 			fflush(stdin);
-			strcpy(clinetext,".ls");
 		}
   
 		if (strcmp(clinetext, ".sv") == 0){
@@ -403,22 +407,6 @@ int main(int argc, char *argv[]) {
 			fclose(file);
 			ED.cmd=1;
 		}
-  
-		if (strcmp(clinetext, ".ls") == 0) {
-			system("cls||clear");printf("%s \n",header);ED.cmd=1;
-			printf("FILENAME: %s | LINEMAX: %d \n",ED.filename,ED.linemax);
-  
-			if(ED.linemax>=1) {
-				printf("\n");
-				int maxdisp = calc_maxdisp();						
-				
-				for(int i=ED.disp;i<maxdisp;i+=1){
-        				printf("%d| %s\n",i,full_file[i]);
-				}
-			}
-      			printf("\n");
-		}
-  
   
 		if (ED.cmd == 0) {
 			if (ED.clinenum==ED.linemax){

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "syntax.h"
+#include "config.h"
 #include "jcedit.h"
 
 char **keywords = NULL;
@@ -92,10 +93,19 @@ void highlight_syntax(char* inp, int crow){
 			
 			
 		}
+		char cr;
 		PRINT:
-		if(i==ED.pos && ED.clinenum == crow){printf("\033[7;5m%c\033[0m",inp[i]);}
+		cr = inp[i];
+		if(i==ED.pos && ED.clinenum == crow && ED.mode == 1){
+			printf("\033[7m");
+			if(cr=='\t'){printf(TABCHAR);}else{
+			printf("%c",inp[i]);}
+			printf("\033[0m");
+		}
 		else{
+		if(cr=='\t'){printf(TABCHAR);}else{
 		printf("%c",inp[i]);}
+		}
 	}
 	printf("\x1b[0m");
 	printf("\n");
