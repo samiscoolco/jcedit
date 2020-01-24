@@ -36,6 +36,7 @@ struct editorData{
 	int clinenum;
 	int cmd;
 	int disp;
+	int pos;
 	int dispLength;
 	char *filename;
 };
@@ -63,7 +64,7 @@ void print_file(char **file, int i, int x) {
 		if (ED.clinenum == i){
 			printf("\x1b[33;1m%3d\x1b[0m| ",i);
 		}else{printf("%3d| ", i);}
-		highlight_syntax(file[i]);
+		highlight_syntax(file[i],ED.pos);
 	}
 	if (ED.clinenum==ED.linemax){
 		//if we are editing the newest line
@@ -280,40 +281,40 @@ int main(int argc, char *argv[]) {
 			int a;
 			ED.cmd = 1;
 			char *cline = full_file[ED.clinenum];
-			int pos = 0;
+			ED.pos = 0;
 			while ((a = getch()) != 27) {
 				switch (a) {
 				case '\n':
 					cline = full_file[++ED.clinenum];
-					pos = 0;
+					ED.pos = 0;
 					break;
 				case ARROW_UP:
 					cline = full_file[--ED.clinenum];
-					pos = 0;
+					ED.pos = 0;
 					break;
 				case ARROW_DOWN:
 					cline = full_file[++ED.clinenum];
-					pos = 0;
+					ED.pos = 0;
 					break;
 				case ARROW_RIGHT:
-					if (pos < strlen(cline)-1) {
-						pos++;
+					if (ED.pos < strlen(cline)-1) {
+						ED.pos++;
 					}
 					break;
 				case ARROW_LEFT:
-					if (pos > 0) {
-						pos --;
+					if (ED.pos > 0) {
+						ED.pos --;
 					}
 					break;
 				case BACKSPACE:
-					if (strlen(cline) > 0 && pos > 0) {
-						pos--;
+					if (strlen(cline) > 0 && ED.pos > 0) {
+						ED.pos--;
 					} else {
 						break;
 					}
 				case DEL_KEY:
 					if (strlen(cline) > 1) {
-						memmove(cline + pos, cline + pos + 1, strlen(cline+pos+1));
+						memmove(cline + ED.pos, cline + ED.pos + 1, strlen(cline+ED.pos+1));
 						//cline = realloc(cline, strlen(cline)); 
 						/* a) this corrupts the heap, and then the next go around it doesn't work. b) something else
 						corrupts the heap, and then this doesn't work. if i get rid of this, we use a bit more memory 
@@ -326,8 +327,8 @@ int main(int argc, char *argv[]) {
 					break;
 				default:
 					cline = realloc(cline, strlen(cline)+2);
-					memmove(cline + pos + 1, cline + pos, strlen(cline)-pos+1);
-					cline[pos++] = a;
+					memmove(cline + ED.pos + 1, cline + ED.pos, strlen(cline)-ED.pos+1);
+					cline[ED.pos++] = a;
 					break;
 				}
 				full_file[ED.clinenum] = cline;
@@ -335,6 +336,7 @@ int main(int argc, char *argv[]) {
 				printf("linelen %d\n", strlen(cline));
 				print_file(full_file, ED.disp, calc_maxdisp());
 			}
+			ED.pos=-1
 		}
 		
 		if (strcmp(clinetext, ".mv") == 0) {

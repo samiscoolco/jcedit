@@ -55,33 +55,44 @@ int check_syntax(char* full,int pos){
 	return -1;
 }
 
-void highlight_syntax(char* inp){
+void highlight_syntax(char* inp, int cur){
+	if cur>-1
 	for(int i=0;i<strlen(inp);i++){
 		int test = check_syntax(inp,i);
+		//TEST IS THE COLOR INDEX, -1 if nothing is found
 		
-		if (test>0){
+		//if you have a keyword? what we gonna do with it
+		if (test>0){ 
+			
+			//Check if it is a block indicator
 			if(colors[test][1] == 'h'){
+				
+				//turn "block" highlighting off if it is on.
 				if(hi==1){
 					hi=0;
 					printf("%c",inp[i]);
 					printf("\x1b[0m");
 					continue;
 				}
+				//turn on block highlighting
 				else{
 					hi=1;
 					printf("%s",get_color(colors[test][0]));
+					goto PRINT;
 				}
 			}
 			
+			//print normal text and keywords 
 			if(hi==0){
 			printf("%s",colors[test]);
 			printf("%s",keywords[test]);
 			printf("\x1b[0m");
-			}
-			else{printf("%s",keywords[test]);}
-
 			i+=strlen(keywords[test]);
+			}
+			
+			
 		}
+		PRINT:
 		printf("%c",inp[i]);
 	}
 	printf("\x1b[0m");
