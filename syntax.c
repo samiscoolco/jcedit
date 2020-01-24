@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "syntax.h"
+#include "jcedit.h"
 
 char **keywords = NULL;
 char **colors = NULL;
@@ -55,8 +56,7 @@ int check_syntax(char* full,int pos){
 	return -1;
 }
 
-void highlight_syntax(char* inp, int cur){
-	if cur>-1
+void highlight_syntax(char* inp, int crow){
 	for(int i=0;i<strlen(inp);i++){
 		int test = check_syntax(inp,i);
 		//TEST IS THE COLOR INDEX, -1 if nothing is found
@@ -93,7 +93,9 @@ void highlight_syntax(char* inp, int cur){
 			
 		}
 		PRINT:
-		printf("%c",inp[i]);
+		if(i==ED.pos && ED.clinenum == crow){printf("\033[7;5m%c\033[0m",inp[i]);}
+		else{
+		printf("%c",inp[i]);}
 	}
 	printf("\x1b[0m");
 	printf("\n");

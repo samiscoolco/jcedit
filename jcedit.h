@@ -16,4 +16,18 @@ int calc_maxdisp(void);
 int file_exist(const char *filename);
 void init(int argc, char **argv);
 
+
+struct editorData{
+	int linemax;
+	int clinenum;
+	int cmd;
+	int disp;
+	int pos;
+	int dispLength;
+	char *filename;
+};
+
+
+extern struct editorData ED;
+
 #endif

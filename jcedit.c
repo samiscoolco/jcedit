@@ -31,15 +31,6 @@ enum keys {
 	INSERT_KEY
 };
 
-struct editorData{
-	int linemax;
-	int clinenum;
-	int cmd;
-	int disp;
-	int pos;
-	int dispLength;
-	char *filename;
-};
 
 char header[50];
 struct editorData ED;
@@ -64,7 +55,9 @@ void print_file(char **file, int i, int x) {
 		if (ED.clinenum == i){
 			printf("\x1b[33;1m%3d\x1b[0m| ",i);
 		}else{printf("%3d| ", i);}
-		highlight_syntax(file[i],ED.pos);
+		
+		//i represents current row
+		highlight_syntax(file[i],i);
 	}
 	if (ED.clinenum==ED.linemax){
 		//if we are editing the newest line
@@ -212,6 +205,7 @@ void init(int argc, char** argv){
 	}
 	
 	//init variables
+	ED.pos=0;
 	ED.linemax = 0;
 	ED.clinenum = 0;
 	ED.cmd = 0;
@@ -336,7 +330,7 @@ int main(int argc, char *argv[]) {
 				printf("linelen %d\n", strlen(cline));
 				print_file(full_file, ED.disp, calc_maxdisp());
 			}
-			ED.pos=-1
+			ED.pos=-1;
 		}
 		
 		if (strcmp(clinetext, ".mv") == 0) {

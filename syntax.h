@@ -9,8 +9,8 @@
 #define PURPLE "\033[1;35m"
 
 /*** functions ***/
-void highlight_syntax(char* inp);
-int check_syntax(char* full,int pos);
+void highlight_syntax(char* inp, int pos);
+int check_syntax(char* full, int crow);
 char* get_color(char a);
 extern char **keywords;
 extern char **colors;
