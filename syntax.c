@@ -8,8 +8,11 @@
 
 char **keywords = NULL;
 char **colors = NULL;
+
+
 int keywordlen = 0;
 int hi = 0;
+
 //For reading the syntax file!!
 char* get_color(char a){
 	if (a < 97){
@@ -58,7 +61,7 @@ int check_syntax(char* full,int pos){
 }
 
 void highlight_syntax(char* inp, int crow){
-	for(int i=0;i<strlen(inp);i++){
+	for(int i=0;i<=strlen(inp);i++){
 		int test = check_syntax(inp,i);
 		//TEST IS THE COLOR INDEX, -1 if nothing is found
 		
@@ -67,7 +70,6 @@ void highlight_syntax(char* inp, int crow){
 			
 			//Check if it is a block indicator
 			if(colors[test][1] == 'h'){
-				
 				//turn "block" highlighting off if it is on.
 				if(hi==1){
 					hi=0;
@@ -83,12 +85,10 @@ void highlight_syntax(char* inp, int crow){
 				}
 			}
 			
-			//print normal text and keywords 
+			//print keywords 
 			if(hi==0){
 			printf("%s",colors[test]);
-			printf("%s",keywords[test]);
-			printf("\x1b[0m");
-			i+=strlen(keywords[test]);
+			keywordlen=strlen(keywords[test]);
 			}
 			
 			
@@ -96,16 +96,26 @@ void highlight_syntax(char* inp, int crow){
 		char cr;
 		PRINT:
 		cr = inp[i];
+
 		if(i==ED.pos && ED.clinenum == crow && ED.mode == 1){
 			printf("\033[7m");
-			if(cr=='\t'){printf(TABCHAR);}else{
+			if(cr=='\t'){printf(TABCHAR);}
+			else if(ED.pos == strlen(ED.full_file[ED.clinenum])){printf(" ");}
+			else
+			{
 			printf("%c",inp[i]);}
-			printf("\033[0m");
+			printf("\033[27m");
 		}
 		else{
-		if(cr=='\t'){printf(TABCHAR);}else{
-		printf("%c",inp[i]);}
+			if(cr=='\t'){printf(TABCHAR);}else{
+			printf("%c",inp[i]);
+			if(keywordlen>0){
+				keywordlen--; 
+				if (keywordlen==0){printf("\x1b[0m");}
+					}
+				}
 		}
+	
 	}
 	printf("\x1b[0m");
 	printf("\n");

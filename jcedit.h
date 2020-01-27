@@ -26,6 +26,7 @@ struct editorData{
 	int pos;
 	int dispLength;
 	char *filename;
+	char **full_file;
 };
 
 

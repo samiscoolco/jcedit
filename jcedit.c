@@ -34,9 +34,8 @@ enum keys {
 
 char header[50];
 struct editorData ED;
-char **full_file = NULL;
 char clinetext[1001];
-char lineJump[5];
+//char lineJump[8];
 
 /*** etc ***/
 void show_help(void){
@@ -46,6 +45,32 @@ void show_help(void){
 	getchar();
 }
 
+//SAFE GETS
+char *sgets(char *line, size_t size)
+{
+   size_t i;
+   for ( i = 0; i < size - 1; ++i )
+   {
+      int ch = fgetc(stdin);
+      if ( ch == '\n' || ch == EOF )
+      {
+         break;
+      }
+      line[i] = ch;
+   }
+   line[i] = '\0';
+   return line;
+}
+
+
+//forced force flush :)
+void ffflush(void)
+{
+    int c;
+    do {
+        c = getchar();
+    } while (c != '\n' && c != EOF);
+}
 
 /*** i/o ***/
 
@@ -213,6 +238,7 @@ void init(int argc, char** argv){
 	ED.disp = 0;
 	ED.dispLength = lim_display ? DISPLAY_LENGTH : w.ws_row-7;
 	ED.filename = NULL;
+	ED.full_file = NULL;
 
 	/* write header */
 	sprintf(header, "JCEdit Version %s", VERNO);
@@ -237,16 +263,16 @@ void init(int argc, char** argv){
 		FILE *fp = fopen(ED.filename, "r");
 		
 		while ((len = getline(&line, &cap, fp)) != -1) {
-			full_file = realloc(full_file, sizeof(char*)*(ED.linemax+1));
-			full_file[ED.linemax] = malloc(len+1);
+			ED.full_file = realloc(ED.full_file, sizeof(char*)*(ED.linemax+1));
+			ED.full_file[ED.linemax] = malloc(len+1);
 			if(line[len-1]=='\n'){line[len-1]='\0';}	//strip newline chars if they exist
-			full_file[ED.linemax] = strndup(line,len);
+			ED.full_file[ED.linemax] = strndup(line,len);
 			ED.linemax+=1;
 		}
 		
 		fclose(fp);
 	} else {
-		full_file=malloc(sizeof(char*));
+		ED.full_file=malloc(sizeof(char*));
 	}
 	
 }
@@ -258,7 +284,7 @@ int main(int argc, char *argv[]) {
 	refresh_screen();
 	while (run) {	
 		refresh_screen();
-		print_file(full_file, ED.disp, calc_maxdisp());
+		print_file(ED.full_file, ED.disp, calc_maxdisp());
 		printf("\n%3d| ", ED.clinenum);
 		ED.mode=0;
 		fgets(clinetext,1001,stdin);
@@ -278,27 +304,27 @@ int main(int argc, char *argv[]) {
 			int a;
 			ED.cmd = 1;
 			refresh_screen();
-			print_file(full_file, ED.disp, calc_maxdisp());
-			char *cline = full_file[ED.clinenum];
+			print_file(ED.full_file, ED.disp, calc_maxdisp());
+			char *cline = ED.full_file[ED.clinenum];
 			ED.pos = 0;
 			while ((a = getch()) != 27) {
 				switch (a) {
 				case '\n':
-					cline = full_file[++ED.clinenum];
+					cline = ED.full_file[++ED.clinenum];
 					ED.pos = 0;
 					break;
 				case ARROW_UP:
-					cline = full_file[--ED.clinenum];
+					cline = ED.full_file[--ED.clinenum];
 					ED.pos = 0;
 					break;
 				case ARROW_DOWN:
-					cline = full_file[++ED.clinenum];
+					cline = ED.full_file[++ED.clinenum];
 					ED.pos = 0;
 					break;
 				case ARROW_RIGHT:
-					if (ED.pos < strlen(cline)-1) {
+					if (ED.pos < strlen(cline)) {
 						ED.pos++;
-					}
+					}else{}
 					break;
 				case ARROW_LEFT:
 					if (ED.pos > 0) {
@@ -330,10 +356,10 @@ int main(int argc, char *argv[]) {
 					cline[ED.pos++] = a;
 					break;
 				}
-				full_file[ED.clinenum] = cline;
+				ED.full_file[ED.clinenum] = cline;
 				refresh_screen();
 				printf("linelen %ld\n", strlen(cline));
-				print_file(full_file, ED.disp, calc_maxdisp());
+				print_file(ED.full_file, ED.disp, calc_maxdisp());
 			}
 		}
 		
@@ -383,25 +409,28 @@ int main(int argc, char *argv[]) {
 				if (ED.linemax > 0) {
 					int maxdisp = calc_maxdisp();
 					//printf("%d, %d\n", ED.disp, maxdisp);
-					print_file(full_file, ED.disp, maxdisp);
+					print_file(ED.full_file, ED.disp, maxdisp);
 				}
 			}
 		}
 		
 		if (strcmp(clinetext, ".ln") == 0){
 			ED.cmd=1; 	
-			fgets(lineJump,5,stdin);
+			char* lineJump = malloc(sizeof(char*)*9999999);
+			sgets(lineJump,9999999);
+			//fgets(lineJump,999999,stdin);
 			ED.clinenum = atoi(lineJump);
-			if (ED.clinenum > ED.linemax) {ED.clinenum = ED.linemax;}
+			if (ED.clinenum > ED.linemax || strlen(lineJump)>7) {ED.clinenum = ED.linemax;}
 			if (ED.clinenum < 0) {ED.clinenum = 0;}
-			fflush(stdin);
+			ED.disp = ED.clinenum;
+			free(lineJump);
 		}
   
 		if (strcmp(clinetext, ".sv") == 0){
 			FILE* file = fopen(ED.filename, "w");
 			
 			for(int i=0;i<ED.linemax;i+=1){
-				fprintf(file,"%s\n",full_file[i]);fflush(file);
+				fprintf(file,"%s\n",ED.full_file[i]);fflush(file);
 			}
 			
 			fclose(file);
@@ -410,20 +439,26 @@ int main(int argc, char *argv[]) {
   
 		if (ED.cmd == 0) {
 			if (ED.clinenum==ED.linemax){
-				full_file = realloc(full_file, sizeof(char*)*(++ED.linemax));
+				ED.full_file = realloc(ED.full_file, sizeof(char*)*(++ED.linemax));
 				if(ED.disp+ED.dispLength<=ED.linemax){ED.disp++;}
 			}
-    	full_file[ED.clinenum] = malloc(strlen(clinetext)+1);
-			full_file[ED.clinenum] = strdup(clinetext);
+    	ED.full_file[ED.clinenum] = malloc(strlen(clinetext)+1);
+			ED.full_file[ED.clinenum] = strdup(clinetext);
 			ED.clinenum+=1;
 		}
 
 		ED.cmd = 0;
-		fflush(stdin);
+
 	}
 
 	return 0;
 }
+
+
+
+
+
+
 // we ever gonna free tha memory doe?
 // it should also be noted that the screen should scroll
 // when the operating on the last line of the view, not just the file
