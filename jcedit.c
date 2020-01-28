@@ -273,6 +273,7 @@ void init(int argc, char** argv){
 		fclose(fp);
 	} else {
 		ED.full_file=malloc(sizeof(char*));
+		//ED.full_file[0] = malloc(sizeof(char));
 	}
 	
 }
@@ -314,40 +315,65 @@ int main(int argc, char *argv[]) {
 					ED.pos = 0;
 					break;
 				case ARROW_UP:
-					cline = ED.full_file[--ED.clinenum];
-					ED.pos = 0;
+					if (ED.clinenum > ED.disp) {
+						ED.clinenum--;
+						ED.pos = ED.pos > strlen(ED.full_file[ED.clinenum]) ? strlen(ED.full_file[ED.clinenum]) : ED.pos;
+					} else {
+						int val = 0;
+						val = (ED.disp)?1:0;
+						ED.disp-=val;ED.clinenum-=val;
+					}
+					cline = ED.full_file[ED.clinenum];
 					break;
 				case ARROW_DOWN:
-					cline = ED.full_file[++ED.clinenum];
-					ED.pos = 0;
+					if (ED.clinenum < ED.linemax-1) {
+						if (ED.clinenum<ED.disp+ED.dispLength -1 ) {
+							ED.clinenum +=1;
+						} else { 
+							ED.disp+=1;
+							ED.clinenum+=1;
+						}
+						ED.pos = ED.pos > strlen(ED.full_file[ED.clinenum]) ? strlen(ED.full_file[ED.clinenum]) : ED.pos;
+						cline = ED.full_file[ED.clinenum];
+					}
 					break;
 				case ARROW_RIGHT:
 					if (ED.pos < strlen(cline)) {
 						ED.pos++;
-					}else{}
+					}
 					break;
 				case ARROW_LEFT:
 					if (ED.pos > 0) {
-						ED.pos --;
+						ED.pos--;
 					}
 					break;
 				case BACKSPACE:
 					if (strlen(cline) > 0 && ED.pos > 0) {
 						ED.pos--;
-					} else {
+					} else if (strlen(cline) > 0) {
 						break;
 					}
 				case DEL_KEY:
-					if (strlen(cline) > 1) {
-						memmove(cline + ED.pos, cline + ED.pos + 1, strlen(cline+ED.pos+1));
+					if (ED.pos == strlen(ED.full_file[ED.clinenum]) && a == DEL_KEY) {
+						break;
+					}
+					if (strlen(cline) > 0) {
+						memmove(cline + ED.pos, cline + ED.pos + 1, sizeof(char)*strlen(cline+ED.pos+1));
 						//cline = realloc(cline, strlen(cline)); 
 						/* a) this corrupts the heap, and then the next go around it doesn't work. b) something else
 						corrupts the heap, and then this doesn't work. if i get rid of this, we use a bit more memory 
 						but i don't have to deal with either option */
 						cline[strlen(cline)-1] = '\0';
 					} else {
-						cline = realloc(cline, 1);
-						cline[0] = '\0';
+						// trying to implement deletion of a blank line here -- not working due to double free issue
+						/*
+						free(cline);
+						memmove(ED.full_file + ED.clinenum, ED.full_file + ED.clinenum + 1, sizeof(char*)*(ED.linemax-ED.clinenum-1));
+						DBGS("this is where stinky happens");
+						free(ED.full_file[ED.linemax-1]);
+						ED.full_file = realloc(ED.full_file, ED.linemax--);
+						cline = ED.full_file[--ED.clinenum];
+						*/
 					}
 					break;
 				default:
@@ -442,6 +468,7 @@ int main(int argc, char *argv[]) {
 				ED.full_file = realloc(ED.full_file, sizeof(char*)*(++ED.linemax));
 				if(ED.disp+ED.dispLength<=ED.linemax){ED.disp++;}
 			}
+		
     	ED.full_file[ED.clinenum] = malloc(strlen(clinetext)+1);
 			ED.full_file[ED.clinenum] = strdup(clinetext);
 			ED.clinenum+=1;
