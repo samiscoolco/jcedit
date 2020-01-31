@@ -110,7 +110,7 @@ void highlight_syntax(char* inp, int crow){
 			if(cr=='\t'){printf(TABCHAR);}else{
 			printf("%c",inp[i]);
 			if(keywordlen>0){
-				keywordlen--; 
+				keywordlen--;
 				if (keywordlen==0){printf("\x1b[0m");}
 					}
 				}

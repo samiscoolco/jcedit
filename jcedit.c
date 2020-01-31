@@ -11,7 +11,7 @@
 #include "syntax.h"
 #include "config.h"
 
-#define VERNO "3.6.5"
+#define VERNO "4.0"
 
 #define DBGS(s) printf("%s\n", s)
 #define DBGI(i) printf("%d\n", i)
@@ -41,7 +41,7 @@ char clinetext[1001];
 void show_help(void){
 	clear();
 	printf("%s\nWritten by sam0s & jdedmondt\n\n",header);
-	printf("Commands:\n\t..? - Show this screen\n\t.qt - Close JCEdit\n\t.sv - Save currently open file\n\t.ls - List lines into display window\n\t.ln - Set current line number\n\t.mv - Use W and S to scroll around the display window\n\nPress enter to return...");
+	printf("Commands:\n\t..? - Show this screen\n\t.qt - Close JCEdit\n\t.sv - Save currently open file\n\t.ln - Jump to certain line by number\n\t.mv - Scroll around the file while in command mode\n\t.i - Enter insert mode (press escape to return to command mode)\n\nPress enter to return...");
 	getchar();
 }
 
@@ -114,13 +114,13 @@ int process_keypress(void) {
 		; /* TODO: ADD ERROR CHECKING HERE */
 	
 	if(c == '\x1b') { /* \x1b is 27 in hex */
-		DBGS("we have an escape sequence");
+		//DBGS("we have an escape sequence");
 		char seq[3];
 		if (read(STDIN_FILENO, &seq[0], 1) != 1) { return '\x1b'; }
 		if (read(STDIN_FILENO, &seq[1], 1) != 1) { return '\x1b'; }
 
 		if (seq[0] == '[') {
-			DBGS("SECOND CHAR IS [");
+			//DBGS("SECOND CHAR IS [");
 			if (seq[1] >= '0' && seq[1] <= '9') {
 				if (read(STDIN_FILENO, &seq[2], 1) != 1) {
 					return '\x1b';
@@ -197,7 +197,7 @@ int file_exist(const char* filename) {
 
 void init(int argc, char** argv){
 	
-	FILE *syn = fopen("/bin/jcedit/notes.syntax", "r");
+	FILE *syn = fopen("/bin/jcdata/syntaxes/notes.syntax", "r");
 	char *keyw = malloc(32);
 	char  c = ' ';
 	int i=0;
@@ -211,7 +211,6 @@ void init(int argc, char** argv){
 		keywords[i] = strdup(keyw);
 		colors[i] = strdup(get_color(c));
 		i++;
-		keywordlen++;
 	}
 	free(keyw);
 	keywords=realloc(keywords,sizeof(char*)*(i+1));
@@ -369,7 +368,7 @@ int main(int argc, char *argv[]) {
 						/*
 						free(cline);
 						memmove(ED.full_file + ED.clinenum, ED.full_file + ED.clinenum + 1, sizeof(char*)*(ED.linemax-ED.clinenum-1));
-						DBGS("this is where stinky happens");
+						//DBGS("this is where stinky happens");
 						free(ED.full_file[ED.linemax-1]);
 						ED.full_file = realloc(ED.full_file, ED.linemax--);
 						cline = ED.full_file[--ED.clinenum];
@@ -384,7 +383,7 @@ int main(int argc, char *argv[]) {
 				}
 				ED.full_file[ED.clinenum] = cline;
 				refresh_screen();
-				printf("linelen %ld\n", strlen(cline));
+				//printf("linelen %ld\n", strlen(cline));
 				print_file(ED.full_file, ED.disp, calc_maxdisp());
 			}
 		}
