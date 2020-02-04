@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <dirent.h>
 
 #include "jcedit.h"
 #include "syntax.h"
@@ -203,8 +204,55 @@ int file_exist(const char* filename) {
 }
 
 void init(int argc, char** argv){
+
+	clear();
+
+	/* syntax file selection menu */
+	DIR *d;
+	struct dirent *dir;
+	char **syntax_files = malloc(sizeof(char*));
 	
-	FILE *syn = fopen("/bin/jcdata/syntaxes/notes.syntax", "r");
+	d = opendir(SYNTAX_PATH);
+	
+	int s = 0;
+	
+	if (d != NULL) {
+		while ((dir = readdir(d)) != NULL) {
+			if (!strcmp(dir->d_name, "..") || !strcmp(dir->d_name, ".")) { continue; }
+			syntax_files[s++] = strdup(dir->d_name);
+			syntax_files = realloc(syntax_files, sizeof(char *)*(s+1));
+		}
+		
+		closedir(d);
+	}
+	
+	
+	printf("Available syntax files in: ");
+	printf(SYNTAX_PATH);
+	printf("\n");
+	for (int j = 0; j < s; j++) {
+		printf("%d %s\n", j, syntax_files[j]);
+	}
+	
+	printf("Please enter the number of the syntax file you would like to use (default=0)\n");
+	
+	char *input = malloc(sizeof(char)*10);
+	int choice;
+	fgets(input, 10, stdin);
+	if (strlen(input) > 0) {
+		choice = atoi(input);
+		if (choice >= s) {
+			die ("input: syntax menu: invalid file number entered.", 1);
+		}
+	}
+
+	char *syn_path = strdup(SYNTAX_PATH);
+	
+	syn_path = realloc(syn_path, strlen(syn_path) + strlen(syntax_files[choice]));
+	
+	syn_path = strcat(syn_path, syntax_files[choice]);
+
+	FILE *syn = fopen(syn_path, "r");
 	if (syn == NULL) {
 		die("error: init: could not open syntax file", 1);
 	}
