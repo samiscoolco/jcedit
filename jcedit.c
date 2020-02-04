@@ -181,6 +181,13 @@ int getch(void) {
 
 /*** utility ***/
 
+void die(char *msg, int ret) {
+	if (msg != NULL) {
+		DBGS(msg);
+	}
+	exit(ret);
+}
+
 int calc_maxdisp(void) {
 	return (ED.disp+ED.dispLength > ED.linemax) ? ED.linemax : ED.disp+ED.dispLength; // change
 }
@@ -198,6 +205,9 @@ int file_exist(const char* filename) {
 void init(int argc, char** argv){
 	
 	FILE *syn = fopen("/bin/jcdata/syntaxes/notes.syntax", "r");
+	if (syn == NULL) {
+		die("error: init: could not open syntax file", 1);
+	}
 	char *keyw = malloc(32);
 	char  c = ' ';
 	int i=0;
