@@ -1,5 +1,5 @@
 #!/bin/bash
-sudo chmod 777 setup
+#sudo chmod 777 setup
 sudo make -B
 sudo mv jcedit /bin
 sudo mkdir /bin/jcdata/
