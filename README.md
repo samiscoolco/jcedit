@@ -97,4 +97,5 @@ To use a command, first ensure that you are in command mode and then simply type
    
    
 _check out the wiki for information on the more advanced features of jcedit 4_
-_Originally intended as a system tool for unreleased operating system JCOS._
+
+_originally intended as a system tool for unreleased operating system JCOS._
