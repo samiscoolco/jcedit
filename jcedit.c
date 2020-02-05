@@ -219,6 +219,14 @@ void init(int argc, char** argv){
 	if (d != NULL) {
 		while ((dir = readdir(d)) != NULL) {
 			if (!strcmp(dir->d_name, "..") || !strcmp(dir->d_name, ".")) { continue; }
+			
+			char *ext = strchr(dir->d_name, '.');
+			if (!ext) {
+				continue;
+			} else if (strcmp(ext, ".syntax")) {
+				continue;
+			}
+			
 			syntax_files[s++] = strdup(dir->d_name);
 			syntax_files = realloc(syntax_files, sizeof(char *)*(s+1));
 		}
@@ -226,6 +234,9 @@ void init(int argc, char** argv){
 		closedir(d);
 	}
 	
+	if (s == 0) {
+		die("input: syntax menu: no syntax files found", 1);
+	}
 	
 	printf("Available syntax files in: ");
 	printf(SYNTAX_PATH);
