@@ -91,11 +91,11 @@ To use a command, first ensure that you are in command mode and then simply type
  
  Created by:
  	
-   - [sam0s]("https://github.com/sam0s")
-   - [jdedmondt]("http://github.com/jdedmondt")
-   - [jaredcop]("https://github.com/jaredcop")
+   - [sam0s](https://github.com/sam0s "Sam")
+   - [jdedmondt](http://github.com/jdedmondt "Jack")
+   - [jaredcop](https://github.com/jaredcop "Jared")
    
    
 _check out the wiki for information on the more advanced features of jcedit 4_
-_Originally intended as a system tool for unreleased operating system JCOS._
 
+_originally intended as a system tool for unreleased operating system JCOS._

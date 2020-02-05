@@ -12,10 +12,45 @@
 #include "syntax.h"
 #include "config.h"
 
-#define VERNO "4.0"
+#define VERNO "4.1"
 
 #define DBGS(s) printf("%s\n", s)
 #define DBGI(i) printf("%d\n", i)
+
+
+/*** utility ***/
+
+//forced force flush :)
+void ffflush(void)
+{
+    int c;
+    do {
+        c = getchar();
+    } while (c != '\n' && c != EOF);
+}
+
+
+void die(char *msg, int ret) {
+	if (msg != NULL) {
+		DBGS(msg);
+	}
+	exit(ret);
+}
+
+int calc_maxdisp(void) {
+	return (ED.disp+ED.dispLength > ED.linemax) ? ED.linemax : ED.disp+ED.dispLength; // change
+}
+
+
+int file_exist(const char* filename) {
+	/* try to open file to read */
+	FILE *file;
+	if (file = fopen(filename, "r")) {
+		fclose(file);
+		return 1;
+	}
+	return 0;
+}
 
 
 enum keys {
@@ -43,7 +78,7 @@ void show_help(void){
 	clear();
 	printf("%s\nWritten by sam0s & jdedmondt\n\n",header);
 	printf("Commands:\n\t..? - Show this screen\n\t.qt - Close JCEdit\n\t.sv - Save currently open file\n\t.ln - Jump to certain line by number\n\t.mv - Scroll around the file while in command mode\n\t.i - Enter insert mode (press escape to return to command mode)\n\nPress enter to return...");
-	getchar();
+	getchar();ffflush();
 }
 
 //SAFE GETS
@@ -63,15 +98,6 @@ char *sgets(char *line, size_t size)
    return line;
 }
 
-
-//forced force flush :)
-void ffflush(void)
-{
-    int c;
-    do {
-        c = getchar();
-    } while (c != '\n' && c != EOF);
-}
 
 /*** i/o ***/
 
@@ -180,29 +206,6 @@ int getch(void) {
 	return ch;
 }
 
-/*** utility ***/
-
-void die(char *msg, int ret) {
-	if (msg != NULL) {
-		DBGS(msg);
-	}
-	exit(ret);
-}
-
-int calc_maxdisp(void) {
-	return (ED.disp+ED.dispLength > ED.linemax) ? ED.linemax : ED.disp+ED.dispLength; // change
-}
-
-int file_exist(const char* filename) {
-	/* try to open file to read */
-	FILE *file;
-	if (file = fopen(filename, "r")) {
-		fclose(file);
-		return 1;
-	}
-	return 0;
-}
-
 void init(int argc, char** argv){
 
 	clear();
@@ -219,6 +222,14 @@ void init(int argc, char** argv){
 	if (d != NULL) {
 		while ((dir = readdir(d)) != NULL) {
 			if (!strcmp(dir->d_name, "..") || !strcmp(dir->d_name, ".")) { continue; }
+			
+			char *ext = strchr(dir->d_name, '.');
+			if (!ext) {
+				continue;
+			} else if (strcmp(ext, ".syntax")) {
+				continue;
+			}
+			
 			syntax_files[s++] = strdup(dir->d_name);
 			syntax_files = realloc(syntax_files, sizeof(char *)*(s+1));
 		}
@@ -226,6 +237,9 @@ void init(int argc, char** argv){
 		closedir(d);
 	}
 	
+	if (s == 0) {
+		die("input: syntax menu: no syntax files found", 1);
+	}
 	
 	printf("Available syntax files in: ");
 	printf(SYNTAX_PATH);
