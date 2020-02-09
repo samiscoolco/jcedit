@@ -382,7 +382,11 @@ int main(int argc, char *argv[]) {
 			while ((a = getch()) != 27) {
 				switch (a) {
 				case '\n':
-					cline = ED.full_file[++ED.clinenum];
+					/* create room for new line */
+					memmove(ED.full_file + ED.clinenum + 1, ED.full_file + ED.clinenum, sizeof(char*)*(ED.linemax-ED.clinenum-1));
+					ED.full_file[ED.clinenum] = malloc(sizeof(char));
+					ED.full_file[ED.clinenum][0] = '\0';
+					++ED.clinenum;
 					ED.pos = 0;
 					break;
 				case ARROW_UP:
@@ -419,41 +423,40 @@ int main(int argc, char *argv[]) {
 					}
 					break;
 				case BACKSPACE:
-					if (strlen(cline) > 0 && ED.pos > 0) {
+					if (ED.pos > 0) {
 						ED.pos--;
-					} else if (strlen(cline) > 0) {
+					} else if (ED.clinenum > 0) {
+						if (strlen(cline) > 0) {
+							break;
+						}
+						ED.pos = strlen(ED.full_file[ED.clinenum-1]);
+						ED.full_file[ED.clinenum-1] = strcat(ED.full_file[ED.clinenum-1], ED.full_file[ED.clinenum]);
+						free(ED.full_file[ED.clinenum]);
+						memmove(ED.full_file + ED.clinenum, ED.full_file + ED.clinenum + 1, sizeof(char*)*(ED.linemax-ED.clinenum-1));
+						--ED.clinenum;
+						break;
+					} else {
 						break;
 					}
 				case DEL_KEY:
-					if (ED.pos == strlen(ED.full_file[ED.clinenum]) && a == DEL_KEY) {
-						break;
-					}
 					if (strlen(cline) > 0) {
-						memmove(cline + ED.pos, cline + ED.pos + 1, sizeof(char)*strlen(cline+ED.pos+1));
-						//cline = realloc(cline, strlen(cline)); 
-						/* a) this corrupts the heap, and then the next go around it doesn't work. b) something else
-						corrupts the heap, and then this doesn't work. if i get rid of this, we use a bit more memory 
-						but i don't have to deal with either option */
-						cline[strlen(cline)-1] = '\0';
-					} else {
-						// trying to implement deletion of a blank line here -- not working due to double free issue
-						/*
-						free(cline);
+            					if (ED.pos == strlen(ED.full_file[ED.clinenum]) && a == DEL_KEY) { 
+							break; 
+						}
+						memmove(ED.full_file[ED.clinenum] + ED.pos, ED.full_file[ED.clinenum] + ED.pos + 1, sizeof(char)*strlen(ED.full_file[ED.clinenum]+ED.pos+1));
+						cline[strlen(ED.full_file[ED.clinenum])-1] = '\0';
+						
+					} else if (ED.clinenum >= 0){
+						free(ED.full_file[ED.clinenum]);
 						memmove(ED.full_file + ED.clinenum, ED.full_file + ED.clinenum + 1, sizeof(char*)*(ED.linemax-ED.clinenum-1));
-						//DBGS("this is where stinky happens");
-						free(ED.full_file[ED.linemax-1]);
-						ED.full_file = realloc(ED.full_file, ED.linemax--);
-						cline = ED.full_file[--ED.clinenum];
-						*/
 					}
 					break;
 				default:
-					cline = realloc(cline, strlen(cline)+2);
-					memmove(cline + ED.pos + 1, cline + ED.pos, strlen(cline)-ED.pos+1);
-					cline[ED.pos++] = a;
+					ED.full_file[ED.clinenum] = realloc(ED.full_file[ED.clinenum], strlen(ED.full_file[ED.clinenum])+2);
+					memmove(ED.full_file[ED.clinenum] + ED.pos + 1, ED.full_file[ED.clinenum] + ED.pos, strlen(ED.full_file[ED.clinenum])-ED.pos+1);
+					ED.full_file[ED.clinenum][ED.pos++] = a;
 					break;
 				}
-				ED.full_file[ED.clinenum] = cline;
 				refresh_screen();
 				//printf("linelen %ld\n", strlen(cline));
 				print_file(ED.full_file, ED.disp, calc_maxdisp());
