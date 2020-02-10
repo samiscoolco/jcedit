@@ -98,6 +98,14 @@ char *sgets(char *line, size_t size)
    return line;
 }
 
+int digits_in_int(int i) {
+	int digits = 0;
+	while (i) {
+		i -= i % 10;
+		i /= 10;
+		digits++;
+	}
+}
 
 /*** i/o ***/
 
@@ -349,6 +357,20 @@ void init(int argc, char** argv){
 	
 }
 
+void remove_cur_line(void) {
+	//free(ED.full_file[ED.clinenum]);
+	memmove(ED.full_file + ED.clinenum, ED.full_file + ED.clinenum + 1, sizeof(char*)*(ED.linemax-ED.clinenum-1));
+	--ED.linemax;
+}
+
+void remove_cur_char(void) {
+	memmove(ED.full_file[ED.clinenum] + ED.pos, ED.full_file[ED.clinenum] + ED.pos + 1, sizeof(char)*strlen(ED.full_file[ED.clinenum]+ED.pos));
+}
+
+void insert_line_after_cur_line(void) {
+
+}
+
 /*** main ***/
 int main(int argc, char *argv[]) {
 	init(argc,argv);
@@ -381,12 +403,13 @@ int main(int argc, char *argv[]) {
 			ED.pos = 0;
 			while ((a = getch()) != 27) {
 				switch (a) {
-				case '\n':
+				case '\n': ;
 					/* create room for new line */
-					memmove(ED.full_file + ED.clinenum + 1, ED.full_file + ED.clinenum, sizeof(char*)*(ED.linemax-ED.clinenum-1));
-					ED.full_file[ED.clinenum] = malloc(sizeof(char));
-					ED.full_file[ED.clinenum][0] = '\0';
-					++ED.clinenum;
+					char *temp = strdup(ED.full_file[ED.clinenum] + ED.pos);
+					ED.full_file[ED.clinenum][ED.pos] = '\0';
+					ED.full_file = realloc(ED.full_file, sizeof(char*)*(++ED.linemax));
+					memmove(ED.full_file + ED.clinenum + 2, ED.full_file + ED.clinenum + 1, sizeof(char*)*(ED.linemax-ED.clinenum-2));
+					ED.full_file[++ED.clinenum] = temp;
 					ED.pos = 0;
 					break;
 				case ARROW_UP:
@@ -413,7 +436,7 @@ int main(int argc, char *argv[]) {
 					}
 					break;
 				case ARROW_RIGHT:
-					if (ED.pos < strlen(cline)) {
+					if (ED.pos < strlen(ED.full_file[ED.clinenum])) {
 						ED.pos++;
 					}
 					break;
@@ -425,30 +448,25 @@ int main(int argc, char *argv[]) {
 				case BACKSPACE:
 					if (ED.pos > 0) {
 						ED.pos--;
+						remove_cur_char();
 					} else if (ED.clinenum > 0) {
-						if (strlen(cline) > 0) {
-							break;
-						}
 						ED.pos = strlen(ED.full_file[ED.clinenum-1]);
-						ED.full_file[ED.clinenum-1] = strcat(ED.full_file[ED.clinenum-1], ED.full_file[ED.clinenum]);
-						free(ED.full_file[ED.clinenum]);
-						memmove(ED.full_file + ED.clinenum, ED.full_file + ED.clinenum + 1, sizeof(char*)*(ED.linemax-ED.clinenum-1));
-						--ED.clinenum;
+						if (strlen(ED.full_file[ED.clinenum]) > 0) {
+							ED.full_file[ED.clinenum-1] = strcat(ED.full_file[ED.clinenum-1], ED.full_file[ED.clinenum]);
+						}
+						remove_cur_line();
+						ED.clinenum--;
 						break;
-					} else {
-						break;
-					}
+					} 
+					break;
 				case DEL_KEY:
-					if (strlen(cline) > 0) {
+					if (strlen(ED.full_file[ED.clinenum]) > 0) {
             					if (ED.pos == strlen(ED.full_file[ED.clinenum]) && a == DEL_KEY) { 
 							break; 
 						}
-						memmove(ED.full_file[ED.clinenum] + ED.pos, ED.full_file[ED.clinenum] + ED.pos + 1, sizeof(char)*strlen(ED.full_file[ED.clinenum]+ED.pos+1));
-						cline[strlen(ED.full_file[ED.clinenum])-1] = '\0';
-						
-					} else if (ED.clinenum >= 0){
-						free(ED.full_file[ED.clinenum]);
-						memmove(ED.full_file + ED.clinenum, ED.full_file + ED.clinenum + 1, sizeof(char*)*(ED.linemax-ED.clinenum-1));
+						remove_cur_char();
+					} else if (ED.linemax > 1) {
+						remove_cur_line();
 					}
 					break;
 				default:
