@@ -105,6 +105,7 @@ int digits_in_int(int i) {
 		i /= 10;
 		digits++;
 	}
+	return digits;
 }
 
 /*** i/o ***/
