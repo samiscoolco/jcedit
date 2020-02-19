@@ -321,7 +321,7 @@ void init(int argc, char** argv){
 	ED.full_file = NULL;
 
 	/* write header */
-	sprintf(header, "JCEdit Version %s", VERNO);
+	sprintf(header, "jcedit Version %s", VERNO);
 
 	//load file if it exists
  	if (argc > 1) {
