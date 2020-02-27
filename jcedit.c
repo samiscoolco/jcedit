@@ -352,7 +352,8 @@ void init(int argc, char** argv){
 		fclose(fp);
 	} else {
 		ED.full_file=malloc(sizeof(char*));
-		//ED.full_file[0] = malloc(sizeof(char));
+		ED.full_file[0] = malloc(sizeof(char));
+		ED.full_file[0][0] = '\0';
 	}
 	
 }
@@ -438,20 +439,20 @@ int main(int argc, char *argv[]) {
 				case ARROW_RIGHT:
 					if (ED.pos < strlen(ED.full_file[ED.clinenum])) {
 						ED.pos++;
+					} else if(ED.clinenum<ED.linemax-1){
+						ED.pos = 0;
+						ED.clinenum++;
 					}
-          else if(ED.clinenum<ED.linemax){
-            ED.pos = 0;
-            ED.clinenum++;
-          }
+					
 					break;
 				case ARROW_LEFT:
 					if (ED.pos > 0) {
 						ED.pos--;
+					} else if(ED.clinenum>0){
+						ED.pos = strlen(ED.full_file[ED.clinenum-1]);
+						ED.clinenum--;
 					}
-          else if(ED.clinenum>0){
-            ED.pos = strlen(ED.full_file[ED.clinenum-1]);
-            ED.clinenum--;
-          }
+					
 					break;
 				case BACKSPACE:
 					if (ED.pos > 0) {
@@ -460,8 +461,8 @@ int main(int argc, char *argv[]) {
 					} else if (ED.clinenum > 0) {
 						ED.pos = strlen(ED.full_file[ED.clinenum-1]);
 						if (strlen(ED.full_file[ED.clinenum]) > 0) {
-              //make room for the strcat additions (worked like a charm)
-              ED.full_file[ED.clinenum-1] = realloc(ED.full_file[ED.clinenum-1],strlen(ED.full_file[ED.clinenum-1])+strlen(ED.full_file[ED.clinenum])+1);
+							//make room for the strcat additions (worked like a charm)
+							ED.full_file[ED.clinenum-1] = realloc(ED.full_file[ED.clinenum-1],strlen(ED.full_file[ED.clinenum-1])+strlen(ED.full_file[ED.clinenum])+1);
 							ED.full_file[ED.clinenum-1] = strcat(ED.full_file[ED.clinenum-1], ED.full_file[ED.clinenum]);
 						}
 						remove_cur_line();
