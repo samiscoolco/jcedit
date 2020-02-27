@@ -12,7 +12,7 @@
 #include "syntax.h"
 #include "config.h"
 
-#define VERNO "4.1"
+#define VERNO "4 final"
 
 #define DBGS(s) printf("%s\n", s)
 #define DBGI(i) printf("%d\n", i)
@@ -306,7 +306,6 @@ void init(int argc, char** argv){
 		if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == -1) {
 			lim_display = 1;
 		}
-		
 	}
 	
 	//init variables
@@ -440,11 +439,19 @@ int main(int argc, char *argv[]) {
 					if (ED.pos < strlen(ED.full_file[ED.clinenum])) {
 						ED.pos++;
 					}
+          else if(ED.clinenum<ED.linemax){
+            ED.pos = 0;
+            ED.clinenum++;
+          }
 					break;
 				case ARROW_LEFT:
 					if (ED.pos > 0) {
 						ED.pos--;
 					}
+          else if(ED.clinenum>0){
+            ED.pos = strlen(ED.full_file[ED.clinenum-1]);
+            ED.clinenum--;
+          }
 					break;
 				case BACKSPACE:
 					if (ED.pos > 0) {
@@ -453,6 +460,8 @@ int main(int argc, char *argv[]) {
 					} else if (ED.clinenum > 0) {
 						ED.pos = strlen(ED.full_file[ED.clinenum-1]);
 						if (strlen(ED.full_file[ED.clinenum]) > 0) {
+              //make room for the strcat additions (worked like a charm)
+              ED.full_file[ED.clinenum-1] = realloc(ED.full_file[ED.clinenum-1],strlen(ED.full_file[ED.clinenum-1])+strlen(ED.full_file[ED.clinenum])+1);
 							ED.full_file[ED.clinenum-1] = strcat(ED.full_file[ED.clinenum-1], ED.full_file[ED.clinenum]);
 						}
 						remove_cur_line();
@@ -574,13 +583,6 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 
-
-
-
-
-
-// we ever gonna free tha memory doe?
-// ok i know what i said before but once LINE-INSERTINg works
-// then jcedit will actually work great
-// syntax highlighting is still a meme
+// we ever gonna free tha memory doe? (no)
+// syntax highlighting is still very much a meme
 

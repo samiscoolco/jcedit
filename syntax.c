@@ -64,7 +64,6 @@ void highlight_syntax(char* inp, int crow){
 	for(int i=0;i<=strlen(inp);i++){
 		int test = check_syntax(inp,i);
 		//TEST IS THE COLOR INDEX, -1 if nothing is found
-		
 		//if you have a keyword? what we gonna do with it
 		if (test>0){ 
 			
@@ -90,7 +89,6 @@ void highlight_syntax(char* inp, int crow){
 			printf("%s",colors[test]);
 			keywordlen=strlen(keywords[test]);
 			}
-			
 			
 		}
 		char cr;

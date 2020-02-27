@@ -5,3 +5,5 @@ sudo mv jcedit /bin
 sudo mkdir /bin/jcdata/
 sudo mkdir /bin/jcdata/syntaxes
 sudo cp syntaxes/notes.syntax /bin/jcdata/syntaxes/notes.syntax
+sudo cp syntaxes/python.syntax /bin/jcdata/syntaxes/python.syntax
+sudo cp syntaxes/c.syntax /bin/jcdata/syntaxes/c.syntax
