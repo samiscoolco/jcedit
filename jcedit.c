@@ -310,7 +310,7 @@ void init(int argc, char** argv){
 	
 	//init variables
 	ED.pos=0;
-	ED.linemax = 0;
+	ED.linemax = 1;
 	ED.clinenum = 0;
 	ED.cmd = 0;
 	ED.mode = 0;
