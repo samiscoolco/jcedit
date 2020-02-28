@@ -310,7 +310,7 @@ void init(int argc, char** argv){
 	
 	//init variables
 	ED.pos=0;
-	ED.linemax = 1;
+	ED.linemax = 0;
 	ED.clinenum = 0;
 	ED.cmd = 0;
 	ED.mode = 0;
@@ -351,6 +351,7 @@ void init(int argc, char** argv){
 		
 		fclose(fp);
 	} else {
+    	ED.linemax = 1;
 		ED.full_file=malloc(sizeof(char*));
 		ED.full_file[0] = malloc(sizeof(char));
 		ED.full_file[0][0] = '\0';
