@@ -1,15 +1,8 @@
-# compiler
-CC=gcc
-#flags
-CLFAGS= -Wall -Wextra -pedantic -fsanitize=address
+all: clean
+	gcc -Wall -Wextra -pedantic -o2 -o jcedit jcedit.c syntax.c
 
-# target executable
-TARGET = jcedit
-
-all: $(TARGET)
-
-$(TARGET): $(TARGET).c syntax.c
-	$(CC) $(CFLAGS) -o $(TARGET) $(TARGET).c syntax.c
+run: all
+	./jcedit
 
 clean:
-	$(RM) $(TARGET)
+	rm -f jcedit
