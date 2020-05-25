@@ -70,8 +70,10 @@ enum keys {
 
 char header[50];
 struct editorData ED;
-char clinetext[1001];
+char *clinetext = NULL;
 //char lineJump[8];
+
+char *copyline_buffer = NULL;
 
 /*** etc ***/
 void show_help(void){
@@ -379,6 +381,11 @@ int main(int argc, char *argv[]) {
 	init(argc,argv);
 	int run = 1;
 	refresh_screen();
+	
+	char *history_buf = malloc(1001);
+	strcpy(history_buf, " ");
+	clinetext = malloc(1001);
+	
 	while (run) {	
 		refresh_screen();
 		print_file(ED.full_file, ED.disp, calc_maxdisp());
@@ -386,6 +393,13 @@ int main(int argc, char *argv[]) {
 		ED.mode=0;
 		fgets(clinetext,1001,stdin);
 		clinetext[strcspn(clinetext, "\n")] = '\0';
+		
+		BEGIN:
+		
+		if (strcmp(clinetext, "\033[A") == 0) {
+			strcpy(clinetext, history_buf);
+			goto BEGIN;
+		}
 
   		if (strcmp(clinetext, "..?") == 0){
 			ED.cmd=1;
@@ -566,6 +580,18 @@ int main(int argc, char *argv[]) {
 			fclose(file);
 			ED.cmd=1;
 		}
+		
+		if (strcmp(clinetext, ".cl") == 0) {
+			ED.cmd = 1;
+			copyline_buffer = ED.full_file[ED.clinenum];
+		}
+		
+		if (strcmp(clinetext, ".pl") == 0) {
+			ED.cmd = 1;
+			if (copyline_buffer != NULL) {
+				strcpy(ED.full_file[ED.clinenum++], copyline_buffer);
+			}
+		}
   
 		if (ED.cmd == 0) {
 			if (ED.clinenum==ED.linemax){
@@ -579,6 +605,8 @@ int main(int argc, char *argv[]) {
 		}
 
 		ED.cmd = 0;
+		
+		strcpy(history_buf, clinetext);
 
 	}
 
