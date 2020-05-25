@@ -78,7 +78,8 @@ void show_help(void){
 	clear();
 	printf("%s\nWritten by sam0s & jdedmondt\n\n",header);
 	printf("Commands:\n\t..? - Show this screen\n\t.qt - Close JCEdit\n\t.sv - Save currently open file\n\t.ln - Jump to certain line by number\n\t.mv - Scroll around the file while in command mode\n\t.i - Enter insert mode (press escape to return to command mode)\n\nPress enter to return...");
-	getchar();ffflush();
+	getchar();
+	//ffflush(); /* i may have just messed something up but what was even the purpose of having this there? */
 }
 
 //SAFE GETS
@@ -389,7 +390,6 @@ int main(int argc, char *argv[]) {
   		if (strcmp(clinetext, "..?") == 0){
 			ED.cmd=1;
 			show_help();
-			strcpy(clinetext,".ls");
 		}
 		if (strcmp(clinetext, ".qt") == 0){
 			run=0;ED.cmd=1;
