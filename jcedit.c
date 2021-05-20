@@ -45,7 +45,7 @@ int calc_maxdisp(void) {
 int file_exist(const char* filename) {
 	/* try to open file to read */
 	FILE *file;
-	if (file = fopen(filename, "r")) {
+	if ( (file = fopen(filename, "r")) ) {
 		fclose(file);
 		return 1;
 	}
@@ -114,8 +114,7 @@ int digits_in_int(int i) {
 /*** i/o ***/
 
 void print_file(char **file, int i, int x) {
-	char* printed = NULL;
-	for (i;i<x;i++) {
+	for(;i<x;i++) {
 		if (ED.clinenum == i){
 			printf("\x1b[33;1m%3d\x1b[0m| ",i);
 		}else{printf("%3d| ", i);}
@@ -207,12 +206,10 @@ int getch(void) {
 	tcgetattr(STDIN_FILENO, &oldattr);
 	newattr = oldattr;
 	newattr.c_lflag &= ~(ICANON | ECHO);
-	newattr.c_cc[VMIN] = 0; /*	Read requires 0 bytes to return */
-	newattr.c_cc[VTIME] = 0; /* Set timeout of 0 seconds */
+	newattr.c_cc[VMIN] = 1; /*	Read requires 0 bytes to return */
+	newattr.c_cc[VTIME] = 2; /* Set timeout of 0 seconds */
 	tcsetattr(STDIN_FILENO, TCSANOW, &newattr);
-	
 	ch = process_keypress();
-
 	tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);
 
 	return ch;
@@ -415,8 +412,9 @@ int main(int argc, char *argv[]) {
 			ED.cmd = 1;
 			refresh_screen();
 			print_file(ED.full_file, ED.disp, calc_maxdisp());
-			char *cline = ED.full_file[ED.clinenum];
+			char* cline = ED.full_file[ED.clinenum];
 			ED.pos = 0;
+      
 			while ((a = getch()) != 27) {
 				switch (a) {
 				case '\n': ;
@@ -505,6 +503,7 @@ int main(int argc, char *argv[]) {
 				//printf("linelen %ld\n", strlen(cline));
 				print_file(ED.full_file, ED.disp, calc_maxdisp());
 			}
+      
 		}
 		
 		if (strcmp(clinetext, ".mv") == 0) {
